@@ -836,6 +836,46 @@
     return false;
   }
 
+  /* ========== AUTO-FETCH EXCEL FROM SERVER ========== */
+  var excelAutoLoaded = false;
+
+  function autoFetchExcel() {
+    fetch("words.xlsx", { cache: "no-cache" }).then(function(resp) {
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      return resp.arrayBuffer();
+    }).then(function(buf) {
+      var data = new Uint8Array(buf);
+      var workbook = XLSX.read(data, { type: "array" });
+      var sheet = workbook.Sheets[workbook.SheetNames[0]];
+      var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
+      if (json.length === 0) return;
+      allQuestions = json.map(function(row, idx) { row._index = idx; return row; });
+      availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
+      excelAutoLoaded = true;
+      /* Auto-detect columns if no mapping exists yet */
+      if (!columnMap.english && !columnMap.pinyin && !columnMap.character) {
+        var detected = autoDetectColumns(availableColumns);
+        columnMap.chapter = detected.chapter || ""; columnMap.qInChapter = detected.qInChapter || "";
+        columnMap.overallQ = detected.overallQ || ""; columnMap.english = detected.english || "";
+        columnMap.pinyin = detected.pinyin || ""; columnMap.character = detected.character || "";
+        columnMap.combined = detected.combined || "";
+      }
+      /* Navigate to config if we have a valid mapping */
+      if (columnMap.english || columnMap.pinyin || columnMap.character) {
+        var chapters = getUniqueChapters();
+        $("saved-banner").classList.remove("hidden");
+        $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 Auto-loaded from server";
+        $("upload-card-title").textContent = "Upload New / Updated Words";
+        buildConfigScreen(); switchScreen("config"); markSaved();
+      } else {
+        buildMappingUI(); $("mapping-card").classList.remove("hidden");
+        showToast("Vocabulary loaded. Please map the columns.");
+      }
+    }).catch(function(err) {
+      console.log("Auto-fetch words.xlsx: " + err.message);
+    });
+  }
+
   /* ========== FILE UPLOAD ========== */
   var uploadArea = $("upload-area"); var fileInput = $("file-input");
   uploadArea.addEventListener("click", function() { fileInput.click(); });
@@ -1039,6 +1079,8 @@
 
   /* ========== AUTO-NAVIGATE IF SAVED DATA ========== */
   if (hasSavedData) { buildConfigScreen(); switchScreen("config"); markSaved(); }
+  /* Always try to auto-fetch Excel from server (updates questions even if saved data exists) */
+  autoFetchExcel();
 
   /* ========== START QUIZ ========== */
   $("btn-start-quiz").addEventListener("click", function() {
@@ -1645,6 +1687,24 @@
       markSaved();
       return true;
     },
+    loadCloudStats: function(data, shouldSwitch) {
+      /* Loads only stats/progress from cloud — questions come from Excel on server */
+      if (data.columnMap) columnMap = data.columnMap;
+      if (data.stats) stats = data.stats;
+      if (data.dailyLog) dailyLog = data.dailyLog;
+      if (data.dailyGoal) dailyGoal = data.dailyGoal;
+      if (allQuestions.length > 0) {
+        var chapters = getUniqueChapters();
+        $("saved-banner").classList.remove("hidden");
+        $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 \u2601 Stats synced";
+        $("upload-card-title").textContent = "Upload New / Updated Words";
+        buildConfigScreen();
+        if (shouldSwitch) switchScreen("config");
+        markSaved();
+      }
+      return true;
+    },
+    isExcelAutoLoaded: function() { return excelAutoLoaded; },
     showToast: showToast,
     onStatsChanged: null,
     onDataChanged: null
@@ -1689,8 +1749,9 @@ try {
     try {
       var state = window._chineseApp.getState();
       var daily = window._chineseApp.getDailyData();
+      /* Save stats only — questions come from words.xlsx on the server */
       await setDoc(doc(db, "users", currentUser.uid), {
-        questions: state.questions, columnMap: state.columnMap, stats: state.stats,
+        columnMap: state.columnMap, stats: state.stats,
         availableColumns: state.availableColumns, dailyLog: daily.dailyLog, dailyGoal: daily.dailyGoal,
         savedAt: new Date().toISOString(), email: currentUser.email
       });
@@ -1732,8 +1793,17 @@ try {
       var snap = await getDoc(doc(db, "users", currentUser.uid));
       if (snap.exists()) {
         var data = snap.data();
-        if (data.questions && data.questions.length > 0) {
-          var quizActive = document.getElementById("screen-quiz").classList.contains("active");
+        var quizActive = document.getElementById("screen-quiz").classList.contains("active");
+        /* Stats-only load: questions come from words.xlsx on server */
+        if (data.stats || data.columnMap) {
+          if (window._chineseApp.loadCloudStats(data, !quizActive)) {
+            updateSyncStatus("synced");
+            if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Stats loaded from cloud");
+            return true;
+          }
+        }
+        /* Backward compat: old saves that still have questions */
+        if (data.questions && data.questions.length > 0 && !window._chineseApp.hasData()) {
           if (window._chineseApp.loadCloudData(data, !quizActive)) {
             updateSyncStatus("synced");
             if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Data loaded from cloud");
@@ -1743,7 +1813,7 @@ try {
       }
       if (window._chineseApp && window._chineseApp.hasData()) {
         await saveFullToCloud();
-        if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Local data uploaded to cloud");
+        if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Progress synced to cloud");
       } else { updateSyncStatus("synced"); }
       return false;
     } catch (e) {
