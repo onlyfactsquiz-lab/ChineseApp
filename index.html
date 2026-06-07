@@ -740,28 +740,47 @@
   function escapeHtml(text) {
     var div = document.createElement("div"); div.appendChild(document.createTextNode(text)); return div.innerHTML;
   }
-  /* Normalize pinyin: convert decomposed diacritics (u + combining caron) to precomposed (ǔ) */
-  var PINYIN_COMPOSE_MAP = {
-    "a\u0304":"\u0101","a\u0301":"\u00e1","a\u030c":"\u01ce","a\u0300":"\u00e0",
-    "e\u0304":"\u0113","e\u0301":"\u00e9","e\u030c":"\u011b","e\u0300":"\u00e8",
-    "i\u0304":"\u012b","i\u0301":"\u00ed","i\u030c":"\u01d0","i\u0300":"\u00ec",
-    "o\u0304":"\u014d","o\u0301":"\u00f3","o\u030c":"\u01d2","o\u0300":"\u00f2",
-    "u\u0304":"\u016b","u\u0301":"\u00fa","u\u030c":"\u01d4","u\u0300":"\u00f9",
-    "\u00fc\u0304":"\u01d6","\u00fc\u0301":"\u01d8","\u00fc\u030c":"\u01da","\u00fc\u0300":"\u01dc",
-    "A\u0304":"\u0100","A\u0301":"\u00c1","A\u030c":"\u01cd","A\u0300":"\u00c0",
-    "E\u0304":"\u0112","E\u0301":"\u00c9","E\u030c":"\u011a","E\u0300":"\u00c8",
-    "I\u0304":"\u012a","I\u0301":"\u00cd","I\u030c":"\u01cf","I\u0300":"\u00cc",
-    "O\u0304":"\u014c","O\u0301":"\u00d3","O\u030c":"\u01d1","O\u0300":"\u00d2",
-    "U\u0304":"\u016a","U\u0301":"\u00da","U\u030c":"\u01d3","U\u0300":"\u00d9",
-    "\u00dc\u0304":"\u01d5","\u00dc\u0301":"\u01d7","\u00dc\u030c":"\u01d9","\u00dc\u0300":"\u01db"
+  /*
+   * Normalize pinyin tone marks. Handles THREE encoding issues:
+   * 1. Spacing tone marks placed AFTER the vowel as separate characters:
+   *    ˉ (U+02C9 macron), ˊ (U+02CA acute), ˇ (U+02C7 caron), ˋ (U+02CB grave)
+   *    ˘ (U+02D8 breve — commonly used in place of caron for tone 3)
+   * 2. Combining diacritical marks that NFC didn't precompose
+   * 3. Combining breve (U+0306) used instead of combining caron (U+030C)
+   */
+  var TONE_MAP = {
+    /* tone 1 (macron) */  a1:"\u0101",e1:"\u0113",i1:"\u012b",o1:"\u014d",u1:"\u016b",v1:"\u01d6",
+    /* tone 2 (acute)  */  a2:"\u00e1",e2:"\u00e9",i2:"\u00ed",o2:"\u00f3",u2:"\u00fa",v2:"\u01d8",
+    /* tone 3 (caron)  */  a3:"\u01ce",e3:"\u011b",i3:"\u01d0",o3:"\u01d2",u3:"\u01d4",v3:"\u01da",
+    /* tone 4 (grave)  */  a4:"\u00e0",e4:"\u00e8",i4:"\u00ec",o4:"\u00f2",u4:"\u00f9",v4:"\u01dc",
+    A1:"\u0100",E1:"\u0112",I1:"\u012a",O1:"\u014c",U1:"\u016a",
+    A2:"\u00c1",E2:"\u00c9",I2:"\u00cd",O2:"\u00d3",U2:"\u00da",
+    A3:"\u01cd",E3:"\u011a",I3:"\u01cf",O3:"\u01d1",U3:"\u01d3",
+    A4:"\u00c0",E4:"\u00c8",I4:"\u00cc",O4:"\u00d2",U4:"\u00d9"
   };
-  var PINYIN_COMPOSE_RE = /[\x41\x45\x49\x4f\x55\x61\x65\x69\x6f\x75\u00fc\u00dc][\u0300\u0301\u0304\u030c]/g;
+  /* Map spacing marks to tone number */
+  var SPACING_TONE = {"\u02c9":"1","\u02ca":"2","\u02c7":"3","\u02d8":"3","\u02cb":"4"};
+  /* Map combining marks to tone number (includes breve U+0306 → tone 3) */
+  var COMBINING_TONE = {"\u0304":"1","\u0301":"2","\u030c":"3","\u0306":"3","\u0300":"4"};
+  /* Regex: vowel followed by spacing tone mark */
+  var SPACING_RE = /([aeiouAEIOU\u00fc\u00dc])([\u02c9\u02ca\u02c7\u02d8\u02cb])/g;
+  /* Regex: vowel followed by combining mark */
+  var COMBINING_RE = /([aeiouAEIOU\u00fc\u00dc])([\u0300\u0301\u0304\u0306\u030c])/g;
+  function pinyinReplace(vowel, mark, toneMap) {
+    var tone = toneMap[mark]; if (!tone) return vowel + mark;
+    var key = (vowel === "\u00fc" ? "v" : vowel === "\u00dc" ? "V" : vowel) + tone;
+    /* Try both cases for ü */
+    return TONE_MAP[key] || TONE_MAP[key.toLowerCase()] || (vowel + mark);
+  }
   function normalizePinyin(text) {
     if (!text) return text;
     /* First apply NFC normalization */
     if (typeof text.normalize === "function") text = text.normalize("NFC");
-    /* Then manually compose any remaining base+combining pairs that NFC missed */
-    return text.replace(PINYIN_COMPOSE_RE, function(m) { return PINYIN_COMPOSE_MAP[m] || m; });
+    /* Fix spacing tone marks (the most common issue from Excel/Chinese software) */
+    text = text.replace(SPACING_RE, function(m, v, t) { return pinyinReplace(v, t, SPACING_TONE); });
+    /* Fix remaining combining marks that NFC missed */
+    text = text.replace(COMBINING_RE, function(m, v, t) { return pinyinReplace(v, t, COMBINING_TONE); });
+    return text;
   }
   function markUnsaved() {
     $("save-info").innerHTML = '<span class="unsaved-dot"></span> <span>Unsaved changes</span>';
