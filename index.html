@@ -300,6 +300,18 @@
   .btn-sync { padding: 5px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
   .btn-sync:hover { border-color: var(--gold); background: var(--bg-card-hover); }
 
+  .cloud-loading-banner { background: linear-gradient(135deg, var(--vermillion), #1a44a8); color: #fff; border-radius: 12px; padding: 24px; margin-bottom: 18px; text-align: center; animation: fadeUp 0.3s ease-out; }
+  .cloud-loading-banner .cloud-spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .cloud-loading-banner h3 { font-family: 'Crimson Pro', serif; font-size: 1.1rem; margin-bottom: 4px; }
+  .cloud-loading-banner p { font-size: 0.88rem; opacity: 0.85; }
+
+  .cloud-prompt { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px 24px; margin-bottom: 18px; text-align: center; box-shadow: 0 2px 12px var(--shadow); }
+  .cloud-prompt .cloud-icon { font-size: 2rem; margin-bottom: 8px; display: block; }
+  .cloud-prompt p { font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+  .cloud-prompt .btn-cloud-login { padding: 10px 24px; background: var(--vermillion); color: #fff; border: none; border-radius: 8px; font-family: 'Crimson Pro', serif; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .cloud-prompt .btn-cloud-login:hover { background: var(--vermillion-light); transform: translateY(-1px); }
+
   @media (max-width: 480px) {
     .app-header h1 { font-size: 1.6rem; }
     .card { padding: 18px 16px; }
@@ -321,8 +333,8 @@
 <body>
 
 <div class="auth-bar">
-  <button class="btn-auth" onclick="login()">Login with Google</button>
-  <button class="btn-auth" onclick="logout()">Logout</button>
+  <button class="btn-auth" id="btn-login" onclick="login()">&#9729; Login with Google</button>
+  <button class="btn-auth hidden" id="btn-logout" onclick="logout()">Logout</button>
   <span class="auth-status" id="userStatus">Checking login...</span>
   <span class="sync-status hidden" id="syncStatus"></span>
   <button class="btn-sync hidden" id="btn-cloud-sync" onclick="window._cloudSync && window._cloudSync()">&#9729; Sync</button>
@@ -341,6 +353,16 @@
 
   <!-- ===== SCREEN: Upload ===== -->
   <div id="screen-upload" class="screen active">
+    <div class="cloud-loading-banner hidden" id="cloud-loading-banner">
+      <div class="cloud-spinner"></div>
+      <h3>Loading your data from the cloud...</h3>
+      <p>Please wait while we sync your vocabulary and statistics.</p>
+    </div>
+    <div class="cloud-prompt hidden" id="cloud-prompt">
+      <span class="cloud-icon">&#9729;&#65039;</span>
+      <p>Already uploaded your vocabulary on another device?<br><strong>Sign in to sync your data automatically.</strong></p>
+      <button class="btn-cloud-login" onclick="login()">&#128274; Sign in with Google</button>
+    </div>
     <div class="saved-banner hidden" id="saved-banner">
       <span class="banner-icon">&#10004;&#65039;</span>
       <div class="banner-text">
@@ -1676,6 +1698,7 @@ try {
     } catch (e) {
       console.log("Cloud save error: " + e.message);
       updateSyncStatus("error", "Save failed");
+      if (window._chineseApp && window._chineseApp.showToast) window._chineseApp.showToast("\u26a0 Cloud save failed: " + e.message);
     }
   }
 
@@ -1691,7 +1714,7 @@ try {
       updateSyncStatus("synced");
     } catch (e) {
       console.log("Stats update failed, trying full save: " + e.message);
-      await saveFullToCloud();
+      try { await saveFullToCloud(); } catch (e2) { /* saveFullToCloud has its own error toast */ }
     }
   }
 
@@ -1726,6 +1749,7 @@ try {
     } catch (e) {
       console.log("Cloud load error: " + e.message);
       updateSyncStatus("error", "Load failed");
+      if (window._chineseApp && window._chineseApp.showToast) window._chineseApp.showToast("\u26a0 Cloud load failed: " + e.message);
       return false;
     }
   }
@@ -1747,22 +1771,52 @@ try {
   };
 
   window.logout = async function () {
-    try { await signOut(auth); currentUser = null; updateSyncStatus("hidden"); }
+    try { await signOut(auth); currentUser = null; updateAuthUI(null); updateSyncStatus("hidden"); }
     catch (e) { console.log("Logout error: " + e.message); }
   };
 
-  onAuthStateChanged(auth, async function(user) {
+  function updateAuthUI(user) {
     var status = document.getElementById("userStatus");
     var syncBtn = document.getElementById("btn-cloud-sync");
+    var loginBtn = document.getElementById("btn-login");
+    var logoutBtn = document.getElementById("btn-logout");
+    var cloudPrompt = document.getElementById("cloud-prompt");
+    var cloudLoading = document.getElementById("cloud-loading-banner");
     if (user) {
-      currentUser = user;
       if (status) status.innerText = user.email;
       if (syncBtn) syncBtn.classList.remove("hidden");
-      await loadFromCloud();
+      if (loginBtn) loginBtn.classList.add("hidden");
+      if (logoutBtn) logoutBtn.classList.remove("hidden");
+      if (cloudPrompt) cloudPrompt.classList.add("hidden");
     } else {
-      currentUser = null;
       if (status) status.innerText = "Not logged in";
       if (syncBtn) syncBtn.classList.add("hidden");
+      if (loginBtn) loginBtn.classList.remove("hidden");
+      if (logoutBtn) logoutBtn.classList.add("hidden");
+      if (cloudLoading) cloudLoading.classList.add("hidden");
+      /* Show cloud prompt on upload screen if no data loaded */
+      if (cloudPrompt && !window._chineseApp.hasData()) cloudPrompt.classList.remove("hidden");
+    }
+  }
+
+  onAuthStateChanged(auth, async function(user) {
+    var cloudLoading = document.getElementById("cloud-loading-banner");
+    var cloudPrompt = document.getElementById("cloud-prompt");
+    if (user) {
+      currentUser = user;
+      updateAuthUI(user);
+      /* Show loading banner while fetching cloud data */
+      if (!window._chineseApp.hasData() && cloudLoading) {
+        cloudLoading.classList.remove("hidden");
+      }
+      var loaded = await loadFromCloud();
+      if (cloudLoading) cloudLoading.classList.add("hidden");
+      if (!loaded && !window._chineseApp.hasData()) {
+        if (window._chineseApp.showToast) window._chineseApp.showToast("No saved data found in cloud. Upload your Excel file to get started.");
+      }
+    } else {
+      currentUser = null;
+      updateAuthUI(null);
       updateSyncStatus("hidden");
     }
   });
@@ -1770,9 +1824,13 @@ try {
 } catch (e) {
   console.log("Firebase init failed: " + e.message);
   var status = document.getElementById("userStatus");
-  if (status) status.innerText = "Auth unavailable";
-  window.login = function () { console.log("Firebase not available"); };
-  window.logout = function () { console.log("Firebase not available"); };
+  if (status) status.innerText = "Offline mode";
+  var loginBtn = document.getElementById("btn-login");
+  if (loginBtn) loginBtn.classList.add("hidden");
+  var cloudPrompt = document.getElementById("cloud-prompt");
+  if (cloudPrompt) cloudPrompt.classList.add("hidden");
+  window.login = function () { if (window._chineseApp && window._chineseApp.showToast) window._chineseApp.showToast("Cloud sync not available in this environment."); };
+  window.logout = function () {};
 }
 </script>
 </body>
