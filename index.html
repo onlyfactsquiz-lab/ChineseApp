@@ -300,6 +300,48 @@
   .btn-sync { padding: 5px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
   .btn-sync:hover { border-color: var(--gold); background: var(--bg-card-hover); }
 
+  /* SRS badge */
+  .srs-badge { display: inline-flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; padding: 3px 8px; border-radius: 10px; font-weight: 600; }
+  .srs-badge.srs-new { background: var(--badge-bg); color: var(--vermillion); }
+  .srs-badge.srs-due { background: rgba(194, 54, 49, 0.12); color: var(--wrong-red); }
+  .srs-badge.srs-good { background: rgba(45, 134, 89, 0.12); color: var(--jade); }
+  .srs-due-count { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); text-align: center; margin-top: 5px; }
+  .btn-srs { background: linear-gradient(135deg, var(--vermillion), #1a44a8); color: #fff; box-shadow: 0 3px 12px rgba(45, 91, 206, 0.3); }
+  .btn-srs:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(45, 91, 206, 0.4); filter: brightness(1.1); }
+
+  /* Audio button */
+  .btn-audio { background: none; border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; transition: all 0.2s; color: var(--text-secondary); position: absolute; top: 12px; right: 12px; }
+  .btn-audio:hover { border-color: var(--vermillion); color: var(--vermillion); background: var(--badge-bg); }
+  .btn-audio.playing { border-color: var(--vermillion); color: var(--vermillion); animation: pulse 0.8s ease-in-out infinite; }
+
+  /* Session review */
+  .review-list { margin-top: 18px; }
+  .review-list-title { font-family: 'Crimson Pro', serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .review-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-light); transition: background 0.15s; }
+  .review-item:last-child { border-bottom: none; }
+  .review-item:hover { background: var(--bg-card-hover); }
+  .review-num { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--wrong-red); font-weight: 700; width: 24px; text-align: center; flex-shrink: 0; }
+  .review-word { flex: 1; min-width: 0; }
+  .review-q { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2px; }
+  .review-a { font-weight: 600; font-size: 1rem; }
+  .review-a .chinese-cell { font-family: 'Noto Serif SC', serif; }
+  .review-a .pinyin-cell { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
+  .review-audio-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.15s; flex-shrink: 0; }
+  .review-audio-btn:hover { background: var(--badge-bg); }
+
+  /* Progress chart */
+  .progress-chart-container { padding: 10px 0; }
+  .progress-chart-title { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+  .progress-chart svg { width: 100%; display: block; }
+  .progress-chart-legend { display: flex; gap: 16px; margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; }
+  .progress-chart-legend-item { display: flex; align-items: center; gap: 5px; }
+  .progress-chart-legend-swatch { width: 12px; height: 4px; border-radius: 2px; display: inline-block; }
+  .progress-summary-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
+  .progress-mini-stat { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; padding: 12px 8px; text-align: center; }
+  .progress-mini-stat .pms-value { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--vermillion); }
+  .progress-mini-stat .pms-label { font-size: 0.7rem; color: var(--text-muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.05em; font-family: 'JetBrains Mono', monospace; }
+  @media (max-width: 480px) { .progress-summary-cards { grid-template-columns: repeat(2, 1fr); } }
+
   .cloud-loading-banner { background: linear-gradient(135deg, var(--vermillion), #1a44a8); color: #fff; border-radius: 12px; padding: 24px; margin-bottom: 18px; text-align: center; animation: fadeUp 0.3s ease-out; }
   .cloud-loading-banner .cloud-spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -460,7 +502,9 @@
         <div class="toggle-switch"><input type="checkbox" id="shuffle-toggle" checked><span class="toggle-slider"></span></div>
       </div>
       <div id="config-question-count" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--text-muted);margin-bottom:4px;"></div>
-      <button class="btn btn-primary btn-block" id="btn-start-quiz" style="font-size:1.14rem;padding:14px 20px;">Start Quiz</button>
+      <button class="btn btn-srs btn-block" id="btn-srs-review" style="font-size:1.14rem;padding:14px 20px;">&#129504; Smart Review (SRS)</button>
+      <div class="srs-due-count" id="srs-due-count"></div>
+      <button class="btn btn-primary btn-block" id="btn-start-quiz" style="font-size:1.14rem;padding:14px 20px;margin-top:10px;">Start Quiz</button>
       <button class="btn btn-secondary btn-block" id="btn-unanswered" style="margin-top:10px;">&#10067; Unanswered Questions Only</button>
       <div id="unanswered-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
       <button class="btn btn-wrong btn-block" id="btn-practice-mistakes" style="margin-top:10px;">&#10007; Practice Mistakes</button>
@@ -482,6 +526,7 @@
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
     <div class="quiz-counter" id="quiz-counter"></div>
     <div class="quiz-question-card" id="quiz-question-card">
+      <button class="btn-audio hidden" id="btn-audio-quiz" title="Play pronunciation">&#128264;</button>
       <div class="quiz-label" id="quiz-label">QUESTION</div>
       <div class="quiz-display" id="quiz-display"></div>
       <div class="quiz-meta" id="quiz-meta"></div>
@@ -506,6 +551,10 @@
         <button class="btn btn-primary" id="btn-results-retry">Retry Mistakes</button>
         <button class="btn btn-secondary" id="btn-results-stats">Full Stats</button>
       </div>
+      <div class="review-list hidden" id="session-review">
+        <div class="review-list-title">&#128269; Mistakes to Review</div>
+        <div id="session-review-list"></div>
+      </div>
     </div>
   </div>
 
@@ -525,6 +574,7 @@
       <button class="stats-tab" data-tab="tab-top-wrong">Top 30 Wrong</button>
       <button class="stats-tab" data-tab="tab-all">All Questions</button>
       <button class="stats-tab" data-tab="tab-completion">Completion</button>
+      <button class="stats-tab" data-tab="tab-progress">Progress</button>
       <button class="stats-tab" data-tab="tab-backup">Backup</button>
       <button class="stats-tab" data-tab="tab-reset">Reset</button>
     </div>
@@ -580,6 +630,21 @@
         </div>
         <div class="cg-summary" id="cg-summary"></div>
         <div class="cg-wrapper" id="completion-wrapper"></div>
+      </div>
+    </div>
+
+    <div class="stats-tab-content" id="tab-progress">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128200;</span> Progress Over Time</div>
+        <div class="progress-summary-cards" id="progress-summary-cards"></div>
+        <div class="progress-chart-container">
+          <div class="progress-chart-title">Last 30 Days — Accuracy &amp; Volume</div>
+          <div class="progress-chart" id="progress-chart"></div>
+          <div class="progress-chart-legend">
+            <span class="progress-chart-legend-item"><span class="progress-chart-legend-swatch" style="background:var(--vermillion);"></span> Accuracy %</span>
+            <span class="progress-chart-legend-item"><span class="progress-chart-legend-swatch" style="background:var(--gold);height:8px;border-radius:2px;"></span> Questions</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -662,8 +727,10 @@
     return q[col] != null ? String(q[col]).trim() : "";
   }
   function ensureStats(key) {
-    if (!stats[key]) stats[key] = { seen: 0, correct: 0, wrong: 0, streak: 0 };
+    if (!stats[key]) stats[key] = { seen: 0, correct: 0, wrong: 0, streak: 0, srsBox: 0, srsNext: 0 };
     if (stats[key].streak === undefined) stats[key].streak = 0;
+    if (stats[key].srsBox === undefined) stats[key].srsBox = 0;
+    if (stats[key].srsNext === undefined) stats[key].srsNext = 0;
   }
   function shuffleArray(arr) {
     var a = arr.slice();
@@ -713,6 +780,94 @@
     fill.style.width = pct + "%";
     if (answered >= dailyGoal) fill.classList.add("goal-met"); else fill.classList.remove("goal-met");
     $("daily-streak").textContent = getDailyStreak();
+  }
+
+  /* ========== SPACED REPETITION SYSTEM ========== */
+  var SRS_INTERVALS = [0, 86400000, 259200000, 604800000, 1209600000, 2592000000]; /* 0, 1d, 3d, 7d, 14d, 30d */
+  var SRS_LABELS = ["New", "1 day", "3 days", "1 week", "2 weeks", "1 month"];
+
+  function getSRSQueue() {
+    var now = Date.now();
+    var filtered = getFilteredQuestions();
+    var due = []; var newQ = [];
+    for (var i = 0; i < filtered.length; i++) {
+      var key = getQuestionKey(filtered[i]); var s = stats[key];
+      if (!s || s.seen === 0) { newQ.push(filtered[i]); continue; }
+      ensureStats(key);
+      if (s.srsNext <= now) due.push({ q: filtered[i], box: s.srsBox, next: s.srsNext });
+    }
+    /* Sort: lower box first (most urgent), then earlier next-review */
+    due.sort(function(a, b) { if (a.box !== b.box) return a.box - b.box; return a.next - b.next; });
+    var result = due.map(function(d) { return d.q; });
+    /* Add new questions at the end */
+    for (var j = 0; j < newQ.length; j++) result.push(newQ[j]);
+    return result;
+  }
+
+  function countSRSDue() {
+    var now = Date.now();
+    var filtered = getFilteredQuestions();
+    var dueCount = 0; var newCount = 0;
+    for (var i = 0; i < filtered.length; i++) {
+      var key = getQuestionKey(filtered[i]); var s = stats[key];
+      if (!s || s.seen === 0) { newCount++; continue; }
+      ensureStats(key);
+      if (s.srsNext <= now) dueCount++;
+    }
+    return { due: dueCount, newQ: newCount };
+  }
+
+  function updateSRSCount() {
+    var counts = countSRSDue();
+    var el = $("srs-due-count"); var btn = $("btn-srs-review");
+    if (counts.due + counts.newQ === 0) {
+      el.textContent = "All caught up! Nothing due for review.";
+      btn.disabled = true;
+    } else {
+      var parts = [];
+      if (counts.due > 0) parts.push(counts.due + " due for review");
+      if (counts.newQ > 0) parts.push(counts.newQ + " new");
+      el.textContent = parts.join(" \u2022 ");
+      btn.disabled = false;
+    }
+  }
+
+  function srsAdvance(key) {
+    ensureStats(key);
+    var s = stats[key];
+    s.srsBox = Math.min(5, (s.srsBox || 0) + 1);
+    s.srsNext = Date.now() + SRS_INTERVALS[s.srsBox];
+  }
+
+  function srsReset(key) {
+    ensureStats(key);
+    stats[key].srsBox = 0;
+    stats[key].srsNext = 0;
+  }
+
+  /* ========== AUDIO PRONUNCIATION ========== */
+  var speechSupported = !!(window.speechSynthesis);
+
+  function speakChinese(text) {
+    if (!speechSupported || !text) return;
+    window.speechSynthesis.cancel();
+    var utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "zh-CN";
+    utterance.rate = 0.85;
+    var audioBtn = $("btn-audio-quiz");
+    if (audioBtn) audioBtn.classList.add("playing");
+    utterance.onend = function() { if (audioBtn) audioBtn.classList.remove("playing"); };
+    utterance.onerror = function() { if (audioBtn) audioBtn.classList.remove("playing"); };
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function getChineseText(q) {
+    var c = getField(q, "character");
+    if (c) return c;
+    /* Try to extract Chinese chars from combined field */
+    var comb = getField(q, "combined");
+    if (comb) { var match = comb.match(/[\u4e00-\u9fff\u3400-\u4dbf]+/); if (match) return match[0]; }
+    return "";
   }
 
   /* ========== LOCAL STORAGE AUTO-SAVE ========== */
@@ -1020,11 +1175,11 @@
         } else {
           selectedChaptersSet[clickedCh] = !selectedChaptersSet[clickedCh];
         }
-        syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+        syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
       });
       container.appendChild(chip);
     }
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount();
     $("range-to").value = allQuestions.length; $("range-to").max = allQuestions.length; $("range-from").max = allQuestions.length;
   }
   $("daily-goal-input").addEventListener("change", function() {
@@ -1033,11 +1188,11 @@
   });
   $("btn-select-all").addEventListener("click", function() {
     for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = true;
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
   });
   $("btn-deselect-all").addEventListener("click", function() {
     for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = false;
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
   });
 
   function getSelectedChapters() {
@@ -1180,6 +1335,15 @@
     var hardest = getHardestQuestions(); if (hardest.length === 0) { showToast("No answered questions yet!"); return; }
     startPracticeMode(hardest);
   });
+  $("btn-srs-review").addEventListener("click", function() {
+    var queue = getSRSQueue();
+    if (queue.length === 0) { showToast("Nothing due for review!"); return; }
+    quizQuestionMode = document.querySelector("input[name='questionMode']:checked").value;
+    quizAnswerMode = document.querySelector("input[name='answerMode']:checked").value;
+    quizQueue = queue; quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = [];
+    singleQuestionMode = false; lastScreen = "config";
+    switchScreen("quiz"); showQuestion();
+  });
 
   /* ========== QUIZ LOGIC ========== */
   function showQuestion() {
@@ -1202,7 +1366,13 @@
     if (stats[key].seen > 0) meta.push("Seen " + stats[key].seen + "\u00d7");
     if (stats[key].wrong > 0) meta.push("\u2717" + stats[key].wrong);
     if (stats[key].streak > 0) meta.push("\ud83d\udd25" + stats[key].streak + "\u00d7 streak");
+    if (stats[key].srsBox > 0) meta.push("SRS: " + SRS_LABELS[stats[key].srsBox]);
     $("quiz-meta").textContent = meta.join("  \u2022  ");
+    /* Audio button: show if question or answer has Chinese */
+    var chText = getChineseText(q);
+    var audioBtn = $("btn-audio-quiz");
+    if (speechSupported && chText) { audioBtn.classList.remove("hidden"); audioBtn.onclick = function() { speakChinese(chText); }; }
+    else { audioBtn.classList.add("hidden"); }
     $("answer-area").classList.add("hidden"); $("quiz-judge").classList.add("hidden");
     $("quiz-actions").innerHTML = '<button class="btn btn-primary btn-block" id="btn-show-answer">Reveal Answer</button>';
     $("btn-show-answer").addEventListener("click", revealAnswer);
@@ -1217,8 +1387,12 @@
   }
   function revealAnswer() {
     answerRevealed = true;
-    $("answer-reveal").innerHTML = buildAnswerHTML(quizQueue[quizIndex], quizAnswerMode);
+    var q = quizQueue[quizIndex];
+    $("answer-reveal").innerHTML = buildAnswerHTML(q, quizAnswerMode);
     $("answer-area").classList.remove("hidden"); $("quiz-actions").innerHTML = ""; $("quiz-judge").classList.remove("hidden");
+    /* Auto-play Chinese pronunciation on reveal */
+    var chText = getChineseText(q);
+    if (speechSupported && chText) speakChinese(chText);
   }
   function buildAnswerHTML(q, mode) {
     if (mode === "combined") {
@@ -1237,14 +1411,16 @@
   }
   $("btn-correct").addEventListener("click", function() {
     var q = quizQueue[quizIndex]; var key = getQuestionKey(q); ensureStats(key);
-    stats[key].seen++; stats[key].correct++; stats[key].streak++; sessionCorrect++; recordDailyAnswer(true); quizIndex++;
+    stats[key].seen++; stats[key].correct++; stats[key].streak++; srsAdvance(key);
+    sessionCorrect++; recordDailyAnswer(true); quizIndex++;
     markUnsaved(); autoSaveToStorage();
     if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
     showQuestion();
   });
   $("btn-wrong").addEventListener("click", function() {
     var q = quizQueue[quizIndex]; var key = getQuestionKey(q); ensureStats(key);
-    stats[key].seen++; stats[key].wrong++; stats[key].streak = 0; sessionWrong++; sessionMistakes.push(q); recordDailyAnswer(false); quizIndex++;
+    stats[key].seen++; stats[key].wrong++; stats[key].streak = 0; srsReset(key);
+    sessionWrong++; sessionMistakes.push(q); recordDailyAnswer(false); quizIndex++;
     markUnsaved(); autoSaveToStorage();
     if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
     showQuestion();
@@ -1262,8 +1438,32 @@
       '<div class="stat-box"><div class="stat-value ' + (pct >= 70 ? "gold" : "") + '">' + pct + '%</div><div class="stat-label">Accuracy</div></div>';
     $("btn-results-retry").disabled = sessionMistakes.length === 0;
     $("btn-results-retry").textContent = sessionMistakes.length === 0 ? "No Mistakes!" : "Retry " + sessionMistakes.length + " Mistake" + (sessionMistakes.length > 1 ? "s" : "");
+    /* Build session review */
+    var reviewEl = $("session-review"); var listEl = $("session-review-list");
+    if (sessionMistakes.length === 0) { reviewEl.classList.add("hidden"); return; }
+    reviewEl.classList.remove("hidden"); listEl.innerHTML = "";
+    for (var mi = 0; mi < sessionMistakes.length; mi++) {
+      var mq = sessionMistakes[mi];
+      var eng = getField(mq, "english"); var cha = getField(mq, "character"); var pin = getField(mq, "pinyin");
+      var chText = getChineseText(mq);
+      var qText = getDisplayText(mq, quizQuestionMode);
+      var aHtml = "";
+      if (cha) aHtml += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
+      if (pin) aHtml += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> ';
+      if (eng) aHtml += escapeHtml(eng);
+      if (!aHtml) aHtml = "\u2014";
+      var row = document.createElement("div"); row.className = "review-item";
+      row.innerHTML = '<div class="review-num">' + (mi + 1) + '</div>' +
+        '<div class="review-word"><div class="review-q">' + escapeHtml(qText) + '</div><div class="review-a">' + aHtml + '</div></div>' +
+        (speechSupported && chText ? '<button class="review-audio-btn" data-ch="' + escapeHtml(chText) + '">&#128264;</button>' : '');
+      listEl.appendChild(row);
+    }
+    listEl.addEventListener("click", function(e) {
+      var btn = e.target.closest(".review-audio-btn");
+      if (btn && btn.dataset.ch) speakChinese(btn.dataset.ch);
+    });
   }
-  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); });
+  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount(); });
   $("btn-results-retry").addEventListener("click", function() {
     if (sessionMistakes.length === 0) return;
     quizQueue = shuffleArray(sessionMistakes); quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = [];
@@ -1293,7 +1493,7 @@
       '<div class="stat-box"><div class="stat-value">' + totalSeen + '</div><div class="stat-label">Attempts</div></div>' +
       '<div class="stat-box"><div class="stat-value green">' + totalCorrect + '</div><div class="stat-label">Correct</div></div>' +
       '<div class="stat-box"><div class="stat-value ' + (lifetimePct >= 70 ? "gold" : "") + '">' + lifetimePct + '%</div><div class="stat-label">Accuracy</div></div>';
-    buildChapterStats(); buildTopWrong(); buildAllQuestionsTable(); buildCompletionGrid();
+    buildChapterStats(); buildTopWrong(); buildAllQuestionsTable(); buildCompletionGrid(); buildProgressChart();
   }
 
   /* ========== TAB: BY CHAPTER ========== */
@@ -1515,6 +1715,82 @@
     });
   }
 
+  /* ========== PROGRESS CHART ========== */
+  function buildProgressChart() {
+    var chartEl = $("progress-chart"); var summaryEl = $("progress-summary-cards");
+    if (!chartEl || !summaryEl) return;
+    /* Gather last 30 days of data */
+    var days = []; var d = new Date();
+    for (var i = 29; i >= 0; i--) {
+      var dd = new Date(d); dd.setDate(dd.getDate() - i);
+      var key = dd.getFullYear() + "-" + String(dd.getMonth() + 1).padStart(2, "0") + "-" + String(dd.getDate()).padStart(2, "0");
+      var log = dailyLog[key] || null;
+      days.push({ key: key, date: dd, label: String(dd.getDate()), log: log,
+        answered: log ? log.answered : 0,
+        correct: log ? log.correct : 0,
+        wrong: log ? log.wrong : 0,
+        accuracy: log && log.answered > 0 ? Math.round((log.correct / log.answered) * 100) : -1
+      });
+    }
+    /* Summary cards */
+    var totalAns = 0; var totalCorr = 0; var activeDays = 0; var streak = getDailyStreak();
+    for (var si = 0; si < days.length; si++) { totalAns += days[si].answered; totalCorr += days[si].correct; if (days[si].answered > 0) activeDays++; }
+    var avgAcc = totalAns > 0 ? Math.round((totalCorr / totalAns) * 100) : 0;
+    summaryEl.innerHTML =
+      '<div class="progress-mini-stat"><div class="pms-value">' + totalAns + '</div><div class="pms-label">30d Total</div></div>' +
+      '<div class="progress-mini-stat"><div class="pms-value">' + avgAcc + '%</div><div class="pms-label">Avg Acc.</div></div>' +
+      '<div class="progress-mini-stat"><div class="pms-value">' + activeDays + '</div><div class="pms-label">Active Days</div></div>' +
+      '<div class="progress-mini-stat"><div class="pms-value">' + streak + '</div><div class="pms-label">Streak</div></div>';
+    /* Build SVG chart */
+    var W = 640; var H = 200; var padL = 36; var padR = 10; var padT = 16; var padB = 28;
+    var chartW = W - padL - padR; var chartH = H - padT - padB;
+    var barW = Math.floor(chartW / days.length) - 2;
+    var maxAns = 1;
+    for (var mi = 0; mi < days.length; mi++) { if (days[mi].answered > maxAns) maxAns = days[mi].answered; }
+    var isDark = document.documentElement.classList.contains("dark");
+    var gridColor = isDark ? "#2e2e4e" : "#e0d8c8";
+    var textColor = isDark ? "#707090" : "#8a8aaa";
+    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="font-family:JetBrains Mono,monospace;">';
+    /* Y-axis grid lines */
+    for (var yi = 0; yi <= 4; yi++) {
+      var yy = padT + chartH - (yi / 4) * chartH;
+      svg += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="' + gridColor + '" stroke-width="0.5"/>';
+      svg += '<text x="' + (padL - 4) + '" y="' + (yy + 3) + '" text-anchor="end" fill="' + textColor + '" font-size="8">' + (yi * 25) + '%</text>';
+    }
+    /* Bars (questions count) and line (accuracy) */
+    var linePts = [];
+    for (var bi = 0; bi < days.length; bi++) {
+      var x = padL + (bi * (chartW / days.length)) + barW / 2 + 1;
+      var barH = days[bi].answered > 0 ? Math.max(2, (days[bi].answered / maxAns) * chartH * 0.85) : 0;
+      var barY = padT + chartH - barH;
+      var barColor = isDark ? "rgba(224, 199, 110, 0.4)" : "rgba(201, 168, 76, 0.35)";
+      if (barH > 0) svg += '<rect x="' + (x - barW / 2) + '" y="' + barY + '" width="' + barW + '" height="' + barH + '" rx="2" fill="' + barColor + '"/>';
+      if (days[bi].accuracy >= 0) {
+        var ly = padT + chartH - (days[bi].accuracy / 100) * chartH;
+        linePts.push(x + "," + ly);
+      }
+      /* X-axis labels: show every 5th day or 1st/last */
+      if (bi === 0 || bi === days.length - 1 || (bi + 1) % 5 === 0) {
+        svg += '<text x="' + x + '" y="' + (H - 4) + '" text-anchor="middle" fill="' + textColor + '" font-size="7">' + days[bi].label + '</text>';
+      }
+    }
+    /* Accuracy line */
+    if (linePts.length > 1) {
+      var lineColor = isDark ? "#5a8df8" : "#2d5bce";
+      svg += '<polyline points="' + linePts.join(" ") + '" fill="none" stroke="' + lineColor + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+      for (var pi = 0; pi < linePts.length; pi++) {
+        var pts = linePts[pi].split(",");
+        svg += '<circle cx="' + pts[0] + '" cy="' + pts[1] + '" r="3" fill="' + lineColor + '"/>';
+      }
+    } else if (linePts.length === 1) {
+      var pt = linePts[0].split(",");
+      var lineColor2 = isDark ? "#5a8df8" : "#2d5bce";
+      svg += '<circle cx="' + pt[0] + '" cy="' + pt[1] + '" r="4" fill="' + lineColor2 + '"/>';
+    }
+    svg += '</svg>';
+    chartEl.innerHTML = svg;
+  }
+
   /* ========== RESET STATS ========== */
   $("btn-reset-stats").addEventListener("click", function() {
     showConfirmDialog("This will permanently erase ALL your answer statistics. Your vocabulary words will remain. Are you sure?", function() {
@@ -1616,9 +1892,9 @@
   });
   $("btn-quit-quiz").addEventListener("click", function() {
     if (singleQuestionMode) { singleQuestionMode = false; buildStatsScreen(); switchScreen("stats"); activateCompletionTab(); return; }
-    switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay();
+    switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount();
   });
-  $("btn-stats-back").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); });
+  $("btn-stats-back").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount(); });
   $("btn-config-stats").addEventListener("click", function() { lastScreen = "config"; buildStatsScreen(); switchScreen("stats"); });
   $("btn-config-reset").addEventListener("click", function() {
     showConfirmDialog("This will permanently erase ALL your answer statistics. Your vocabulary words will remain. Are you sure?", function() {
