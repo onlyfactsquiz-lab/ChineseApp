@@ -741,53 +741,31 @@
     var div = document.createElement("div"); div.appendChild(document.createTextNode(text)); return div.innerHTML;
   }
   /*
-   * Normalize pinyin tone marks. Handles ALL known encoding problems:
-   * 1. Precomposed breve chars that NFC creates (ă→ǎ, ĕ→ě, etc.)
-   * 2. Spacing tone marks after vowels (˘ˇˉˊˋ as separate chars)
-   * 3. Combining diacritical marks that NFC didn't precompose
-   * 4. Combining breve (U+0306) used instead of combining caron
-   * 5. Orphan spacing/combining marks with no adjacent vowel
+   * Normalize pinyin tone marks.
+   * Strategy: spacing diacritics → combining equivalents → NFD → fix breve → NFC.
+   * This works regardless of how the tone marks are encoded because everything
+   * gets fully decomposed and then cleanly recomposed.
    */
-  /* Step 1: precomposed breve → caron (NFC turns a+U+0306 into ă, but pinyin needs ǎ) */
-  var BREVE_TO_CARON = {
-    "\u0103":"\u01ce","\u0115":"\u011b","\u012d":"\u01d0","\u014f":"\u01d2","\u016d":"\u01d4",
-    "\u0102":"\u01cd","\u0114":"\u011a","\u012c":"\u01cf","\u014e":"\u01d1","\u016c":"\u01d3"
+  /* Spacing diacritics → their combining equivalents */
+  var SPACING_TO_COMBINING = {
+    "\u02c9":"\u0304","\u00af":"\u0304",          /* macron (tone 1) */
+    "\u02ca":"\u0301","\u00b4":"\u0301",          /* acute  (tone 2) */
+    "\u02c7":"\u030c","\u02d8":"\u030c",          /* caron/breve (tone 3) */
+    "\u02cb":"\u0300"                              /* grave  (tone 4) */
   };
-  var BREVE_RE = /[\u0102\u0103\u0114\u0115\u012c\u012d\u014e\u014f\u016c\u016d]/g;
-  /* Step 2-3: vowel + spacing/combining mark → precomposed */
-  var TONE_MAP = {
-    a1:"\u0101",e1:"\u0113",i1:"\u012b",o1:"\u014d",u1:"\u016b",v1:"\u01d6",
-    a2:"\u00e1",e2:"\u00e9",i2:"\u00ed",o2:"\u00f3",u2:"\u00fa",v2:"\u01d8",
-    a3:"\u01ce",e3:"\u011b",i3:"\u01d0",o3:"\u01d2",u3:"\u01d4",v3:"\u01da",
-    a4:"\u00e0",e4:"\u00e8",i4:"\u00ec",o4:"\u00f2",u4:"\u00f9",v4:"\u01dc",
-    A1:"\u0100",E1:"\u0112",I1:"\u012a",O1:"\u014c",U1:"\u016a",
-    A2:"\u00c1",E2:"\u00c9",I2:"\u00cd",O2:"\u00d3",U2:"\u00da",
-    A3:"\u01cd",E3:"\u011a",I3:"\u01cf",O3:"\u01d1",U3:"\u01d3",
-    A4:"\u00c0",E4:"\u00c8",I4:"\u00cc",O4:"\u00d2",U4:"\u00d9"
-  };
-  /* All spacing marks that represent tones: ˉ=1, ˊ=2, ˇ/˘=3, ˋ=4 */
-  var MARK_TO_TONE = {
-    "\u02c9":"1","\u02ca":"2","\u02c7":"3","\u02d8":"3","\u02cb":"4",
-    "\u0304":"1","\u0301":"2","\u030c":"3","\u0306":"3","\u0300":"4"
-  };
-  /* Regex: vowel followed by ANY tone mark (spacing or combining) */
-  var VOWEL_MARK_RE = /([aeiouAEIOU\u00fc\u00dc])([\u02c7\u02c9\u02ca\u02cb\u02d8\u0300\u0301\u0304\u0306\u030c])/g;
-  /* Step 4: orphan marks with no adjacent vowel — just remove them */
-  var ORPHAN_MARK_RE = /[\u02c7\u02c9\u02ca\u02cb\u02d8\u0300\u0301\u0304\u0306\u030c]/g;
+  var SPACING_MARK_RE = /[\u02c7\u02c9\u02ca\u02cb\u02d8\u00af\u00b4]/g;
   function normalizePinyin(text) {
     if (!text) return text;
-    /* NFC first: compose standard decomposed sequences */
+    /* 1. Remove zero-width chars that may sit between vowels and marks */
+    text = text.replace(/[\u200b\u200c\u200d\ufeff]/g, "");
+    /* 2. Convert spacing diacritics to combining equivalents */
+    text = text.replace(SPACING_MARK_RE, function(m) { return SPACING_TO_COMBINING[m] || m; });
+    /* 3. NFD: decompose everything into base chars + combining marks */
+    if (typeof text.normalize === "function") text = text.normalize("NFD");
+    /* 4. Fix: combining breve/inverted breve → combining caron (breve is never valid in pinyin) */
+    text = text.replace(/[\u0306\u0311]/g, "\u030c");
+    /* 5. NFC: recompose into clean precomposed characters */
     if (typeof text.normalize === "function") text = text.normalize("NFC");
-    /* Fix precomposed breve → caron (ă→ǎ, ĕ→ě, ĭ→ǐ, ŏ→ǒ, ŭ→ǔ) */
-    text = text.replace(BREVE_RE, function(c) { return BREVE_TO_CARON[c] || c; });
-    /* Fix vowel + tone mark pairs (spacing or combining) */
-    text = text.replace(VOWEL_MARK_RE, function(m, v, t) {
-      var tone = MARK_TO_TONE[t]; if (!tone) return m;
-      var key = (v === "\u00fc" ? "v" : v === "\u00dc" ? "V" : v) + tone;
-      return TONE_MAP[key] || TONE_MAP[key.toLowerCase()] || m;
-    });
-    /* Remove any orphan marks that couldn't be attached to a vowel */
-    text = text.replace(ORPHAN_MARK_RE, "");
     return text;
   }
   function markUnsaved() {
