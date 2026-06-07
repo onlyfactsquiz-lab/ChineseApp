@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>汉语学习 - Chinese Learning Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#4CAF50">
+
+  <!-- Firebase SDK (modern modular version) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAOMlfo-b3tZoXPlH-wYJKJKevY-oAMRY4",
+      authDomain: "chinese-595bb.firebaseapp.com",
+      projectId: "chinese-595bb",
+      appId: "1:639352686956:web:c091c0693ee9f7a75f0b49"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    window.login = async function () {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+    };
+
+    window.logout = async function () {
+      await signOut(auth);
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      const status = document.getElementById("userStatus");
+      if (user) {
+        status.innerText = "Logged in as: " + user.email;
+      } else {
+        status.innerText = "Not logged in";
+      }
+    });
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/service-worker.js');
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      padding: 20px;
+    }
+
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>汉语学习</h1>
+
+<div>
+  <button onclick="login()">Login with Google</button>
+  <button onclick="logout()">Logout</button>
+  <p id="userStatus">Checking login...</p>
+</div>
+
+<hr>
+
+<h2>Your Vocabulary App Goes Below</h2>
+<p>Replace this section with your full vocabulary trainer HTML content.</p>
+
+</body>
+</html>
