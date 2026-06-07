@@ -741,45 +741,53 @@
     var div = document.createElement("div"); div.appendChild(document.createTextNode(text)); return div.innerHTML;
   }
   /*
-   * Normalize pinyin tone marks. Handles THREE encoding issues:
-   * 1. Spacing tone marks placed AFTER the vowel as separate characters:
-   *    ˉ (U+02C9 macron), ˊ (U+02CA acute), ˇ (U+02C7 caron), ˋ (U+02CB grave)
-   *    ˘ (U+02D8 breve — commonly used in place of caron for tone 3)
-   * 2. Combining diacritical marks that NFC didn't precompose
-   * 3. Combining breve (U+0306) used instead of combining caron (U+030C)
+   * Normalize pinyin tone marks. Handles ALL known encoding problems:
+   * 1. Precomposed breve chars that NFC creates (ă→ǎ, ĕ→ě, etc.)
+   * 2. Spacing tone marks after vowels (˘ˇˉˊˋ as separate chars)
+   * 3. Combining diacritical marks that NFC didn't precompose
+   * 4. Combining breve (U+0306) used instead of combining caron
+   * 5. Orphan spacing/combining marks with no adjacent vowel
    */
+  /* Step 1: precomposed breve → caron (NFC turns a+U+0306 into ă, but pinyin needs ǎ) */
+  var BREVE_TO_CARON = {
+    "\u0103":"\u01ce","\u0115":"\u011b","\u012d":"\u01d0","\u014f":"\u01d2","\u016d":"\u01d4",
+    "\u0102":"\u01cd","\u0114":"\u011a","\u012c":"\u01cf","\u014e":"\u01d1","\u016c":"\u01d3"
+  };
+  var BREVE_RE = /[\u0102\u0103\u0114\u0115\u012c\u012d\u014e\u014f\u016c\u016d]/g;
+  /* Step 2-3: vowel + spacing/combining mark → precomposed */
   var TONE_MAP = {
-    /* tone 1 (macron) */  a1:"\u0101",e1:"\u0113",i1:"\u012b",o1:"\u014d",u1:"\u016b",v1:"\u01d6",
-    /* tone 2 (acute)  */  a2:"\u00e1",e2:"\u00e9",i2:"\u00ed",o2:"\u00f3",u2:"\u00fa",v2:"\u01d8",
-    /* tone 3 (caron)  */  a3:"\u01ce",e3:"\u011b",i3:"\u01d0",o3:"\u01d2",u3:"\u01d4",v3:"\u01da",
-    /* tone 4 (grave)  */  a4:"\u00e0",e4:"\u00e8",i4:"\u00ec",o4:"\u00f2",u4:"\u00f9",v4:"\u01dc",
+    a1:"\u0101",e1:"\u0113",i1:"\u012b",o1:"\u014d",u1:"\u016b",v1:"\u01d6",
+    a2:"\u00e1",e2:"\u00e9",i2:"\u00ed",o2:"\u00f3",u2:"\u00fa",v2:"\u01d8",
+    a3:"\u01ce",e3:"\u011b",i3:"\u01d0",o3:"\u01d2",u3:"\u01d4",v3:"\u01da",
+    a4:"\u00e0",e4:"\u00e8",i4:"\u00ec",o4:"\u00f2",u4:"\u00f9",v4:"\u01dc",
     A1:"\u0100",E1:"\u0112",I1:"\u012a",O1:"\u014c",U1:"\u016a",
     A2:"\u00c1",E2:"\u00c9",I2:"\u00cd",O2:"\u00d3",U2:"\u00da",
     A3:"\u01cd",E3:"\u011a",I3:"\u01cf",O3:"\u01d1",U3:"\u01d3",
     A4:"\u00c0",E4:"\u00c8",I4:"\u00cc",O4:"\u00d2",U4:"\u00d9"
   };
-  /* Map spacing marks to tone number */
-  var SPACING_TONE = {"\u02c9":"1","\u02ca":"2","\u02c7":"3","\u02d8":"3","\u02cb":"4"};
-  /* Map combining marks to tone number (includes breve U+0306 → tone 3) */
-  var COMBINING_TONE = {"\u0304":"1","\u0301":"2","\u030c":"3","\u0306":"3","\u0300":"4"};
-  /* Regex: vowel followed by spacing tone mark */
-  var SPACING_RE = /([aeiouAEIOU\u00fc\u00dc])([\u02c9\u02ca\u02c7\u02d8\u02cb])/g;
-  /* Regex: vowel followed by combining mark */
-  var COMBINING_RE = /([aeiouAEIOU\u00fc\u00dc])([\u0300\u0301\u0304\u0306\u030c])/g;
-  function pinyinReplace(vowel, mark, toneMap) {
-    var tone = toneMap[mark]; if (!tone) return vowel + mark;
-    var key = (vowel === "\u00fc" ? "v" : vowel === "\u00dc" ? "V" : vowel) + tone;
-    /* Try both cases for ü */
-    return TONE_MAP[key] || TONE_MAP[key.toLowerCase()] || (vowel + mark);
-  }
+  /* All spacing marks that represent tones: ˉ=1, ˊ=2, ˇ/˘=3, ˋ=4 */
+  var MARK_TO_TONE = {
+    "\u02c9":"1","\u02ca":"2","\u02c7":"3","\u02d8":"3","\u02cb":"4",
+    "\u0304":"1","\u0301":"2","\u030c":"3","\u0306":"3","\u0300":"4"
+  };
+  /* Regex: vowel followed by ANY tone mark (spacing or combining) */
+  var VOWEL_MARK_RE = /([aeiouAEIOU\u00fc\u00dc])([\u02c7\u02c9\u02ca\u02cb\u02d8\u0300\u0301\u0304\u0306\u030c])/g;
+  /* Step 4: orphan marks with no adjacent vowel — just remove them */
+  var ORPHAN_MARK_RE = /[\u02c7\u02c9\u02ca\u02cb\u02d8\u0300\u0301\u0304\u0306\u030c]/g;
   function normalizePinyin(text) {
     if (!text) return text;
-    /* First apply NFC normalization */
+    /* NFC first: compose standard decomposed sequences */
     if (typeof text.normalize === "function") text = text.normalize("NFC");
-    /* Fix spacing tone marks (the most common issue from Excel/Chinese software) */
-    text = text.replace(SPACING_RE, function(m, v, t) { return pinyinReplace(v, t, SPACING_TONE); });
-    /* Fix remaining combining marks that NFC missed */
-    text = text.replace(COMBINING_RE, function(m, v, t) { return pinyinReplace(v, t, COMBINING_TONE); });
+    /* Fix precomposed breve → caron (ă→ǎ, ĕ→ě, ĭ→ǐ, ŏ→ǒ, ŭ→ǔ) */
+    text = text.replace(BREVE_RE, function(c) { return BREVE_TO_CARON[c] || c; });
+    /* Fix vowel + tone mark pairs (spacing or combining) */
+    text = text.replace(VOWEL_MARK_RE, function(m, v, t) {
+      var tone = MARK_TO_TONE[t]; if (!tone) return m;
+      var key = (v === "\u00fc" ? "v" : v === "\u00dc" ? "V" : v) + tone;
+      return TONE_MAP[key] || TONE_MAP[key.toLowerCase()] || m;
+    });
+    /* Remove any orphan marks that couldn't be attached to a vowel */
+    text = text.replace(ORPHAN_MARK_RE, "");
     return text;
   }
   function markUnsaved() {
@@ -1033,6 +1041,15 @@
     return false;
   }
 
+  /* Normalize all string values in a row (fixes pinyin tone marks at data-load time) */
+  function normalizeRow(row) {
+    var keys = Object.keys(row);
+    for (var k = 0; k < keys.length; k++) {
+      if (typeof row[keys[k]] === "string") row[keys[k]] = normalizePinyin(row[keys[k]]);
+    }
+    return row;
+  }
+
   /* ========== AUTO-FETCH EXCEL FROM SERVER ========== */
   var excelAutoLoaded = false;
 
@@ -1046,7 +1063,7 @@
       var sheet = workbook.Sheets[workbook.SheetNames[0]];
       var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       if (json.length === 0) return;
-      allQuestions = json.map(function(row, idx) { row._index = idx; return row; });
+      allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
       availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
       excelAutoLoaded = true;
       /* Auto-detect columns if no mapping exists yet */
@@ -1090,7 +1107,7 @@
         var sheet = workbook.Sheets[workbook.SheetNames[0]];
         var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (json.length === 0) { showToast("No data found."); return; }
-        allQuestions = json.map(function(row, idx) { row._index = idx; return row; });
+        allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
         stats = {};
         availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
         var detected = autoDetectColumns(availableColumns);
@@ -1994,7 +2011,7 @@
     hasData: function() { return allQuestions.length > 0; },
     loadCloudData: function(data, shouldSwitch) {
       if (!data || !data.questions || data.questions.length === 0) return false;
-      allQuestions = data.questions.map(function(row, idx) { row._index = idx; return row; });
+      allQuestions = data.questions.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
       if (data.columnMap) columnMap = data.columnMap;
       if (data.stats) stats = data.stats;
       if (data.availableColumns) availableColumns = data.availableColumns;
