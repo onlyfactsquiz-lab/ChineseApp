@@ -1981,6 +1981,14 @@
       return true;
     },
     isExcelAutoLoaded: function() { return excelAutoLoaded; },
+    resetUserStats: function() {
+      stats = {};
+      dailyLog = {};
+      dailyGoal = 20;
+      if (allQuestions.length > 0) {
+        buildConfigScreen();
+      }
+    },
     showToast: showToast,
     onStatsChanged: null,
     onDataChanged: null
@@ -2117,7 +2125,16 @@ try {
   };
 
   window.logout = async function () {
-    try { await signOut(auth); currentUser = null; updateAuthUI(null); updateSyncStatus("hidden"); }
+    try {
+      await signOut(auth);
+      currentUser = null;
+      /* Reset stats so no personal data lingers after logout */
+      if (window._chineseApp && window._chineseApp.resetUserStats) {
+        window._chineseApp.resetUserStats();
+      }
+      updateAuthUI(null);
+      updateSyncStatus("hidden");
+    }
     catch (e) { console.log("Logout error: " + e.message); }
   };
 
@@ -2151,6 +2168,10 @@ try {
     if (user) {
       currentUser = user;
       updateAuthUI(user);
+      /* Reset stats so the new user starts clean — their personal stats load from Firestore */
+      if (window._chineseApp && window._chineseApp.resetUserStats) {
+        window._chineseApp.resetUserStats();
+      }
       /* Show loading banner while fetching cloud data */
       if (!window._chineseApp.hasData() && cloudLoading) {
         cloudLoading.classList.remove("hidden");
@@ -2162,6 +2183,10 @@ try {
       }
     } else {
       currentUser = null;
+      /* Reset stats on logout so no personal data lingers for the next user */
+      if (window._chineseApp && window._chineseApp.resetUserStats) {
+        window._chineseApp.resetUserStats();
+      }
       updateAuthUI(null);
       updateSyncStatus("hidden");
     }
