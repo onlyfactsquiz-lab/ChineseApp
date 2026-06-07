@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>汉语学习 — Chinese Learning Tool</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Noto+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
@@ -134,13 +134,13 @@
   .quiz-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
   .quiz-display { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; word-break: break-word; }
   .quiz-display.chinese { font-family: 'Noto Serif SC', serif; font-size: 2.8rem; font-weight: 900; }
-  .quiz-display.pinyin { font-family: 'Noto Sans', sans-serif; font-size: 1.8rem; font-weight: 600; color: var(--gold); }
+  .quiz-display.pinyin { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 1.8rem; font-weight: 600; color: var(--gold); }
   .quiz-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; }
   .answer-reveal { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px; margin-bottom: 18px; text-align: center; animation: fadeUp 0.25s ease-out; }
   .answer-reveal .answer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
   .answer-reveal .answer-text { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
   .answer-reveal .answer-text.chinese { font-family: 'Noto Serif SC', serif; font-size: 2rem; font-weight: 900; }
-  .answer-reveal .answer-text.pinyin { font-family: 'Noto Sans', sans-serif; color: var(--gold); }
+  .answer-reveal .answer-text.pinyin { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--gold); }
   .answer-combined { display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
   .stat-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px 10px; text-align: center; box-shadow: 0 2px 8px var(--shadow); }
@@ -155,7 +155,7 @@
   .stats-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
   .stats-table tr:hover td { background: var(--bg-card-hover); }
   .stats-table .chinese-cell { font-family: 'Noto Serif SC', serif; font-weight: 600; }
-  .stats-table .pinyin-cell { font-family: 'Noto Sans', sans-serif; font-size: 0.82rem; color: var(--gold); }
+  .stats-table .pinyin-cell { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 0.82rem; color: var(--gold); }
   .stats-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--stat-bar-bg); min-width: 60px; }
   .stats-bar .bar-correct { background: var(--jade); transition: width 0.3s; }
   .stats-bar .bar-wrong { background: var(--wrong-red); transition: width 0.3s; }
@@ -243,7 +243,7 @@
   .wrong-word-main { font-weight: 600; font-size: 1rem; }
   .wrong-word-main .chinese-cell { font-family: 'Noto Serif SC', serif; }
   .wrong-word-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
-  .wrong-word-sub .pinyin-cell { font-family: 'Noto Sans', sans-serif; color: var(--gold); }
+  .wrong-word-sub .pinyin-cell { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--gold); }
   .wrong-stats { text-align: right; flex-shrink: 0; }
   .wrong-stats .wrong-count-big { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--wrong-red); }
   .wrong-stats .wrong-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
@@ -325,7 +325,7 @@
   .review-q { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2px; }
   .review-a { font-weight: 600; font-size: 1rem; }
   .review-a .chinese-cell { font-family: 'Noto Serif SC', serif; }
-  .review-a .pinyin-cell { font-family: 'Noto Sans', sans-serif; color: var(--gold); }
+  .review-a .pinyin-cell { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--gold); }
   .review-audio-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.15s; flex-shrink: 0; }
   .review-audio-btn:hover { background: var(--badge-bg); }
 
