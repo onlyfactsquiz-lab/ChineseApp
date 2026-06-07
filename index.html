@@ -8,8 +8,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
-    --vermillion: #c23631;
-    --vermillion-light: #e05550;
+    --vermillion: #2d5bce;
+    --vermillion-light: #4a78e8;
     --gold: #c9a84c;
     --gold-light: #e0c76e;
     --ink: #1a1a2e;
@@ -27,14 +27,16 @@
     --border-light: #ece6d8;
     --shadow: rgba(26, 26, 46, 0.08);
     --shadow-heavy: rgba(26, 26, 46, 0.15);
-    --badge-bg: rgba(194, 54, 49, 0.08);
+    --badge-bg: rgba(45, 91, 206, 0.08);
     --overlay: rgba(26, 26, 46, 0.5);
     --input-bg: #ffffff;
     --stat-bar-bg: #e8e0d0;
+    --wrong-red: #c23631;
+    --wrong-red-light: #e05550;
   }
   html.dark {
-    --vermillion: #e05550;
-    --vermillion-light: #ff7a75;
+    --vermillion: #5a8df8;
+    --vermillion-light: #7da8ff;
     --gold: #e0c76e;
     --gold-light: #f0da8a;
     --ink: #e8e0d0;
@@ -52,10 +54,12 @@
     --border-light: #282848;
     --shadow: rgba(0, 0, 0, 0.25);
     --shadow-heavy: rgba(0, 0, 0, 0.4);
-    --badge-bg: rgba(224, 85, 80, 0.15);
+    --badge-bg: rgba(90, 141, 248, 0.15);
     --overlay: rgba(0, 0, 0, 0.6);
     --input-bg: #1a1a30;
     --stat-bar-bg: #2a2a44;
+    --wrong-red: #e05550;
+    --wrong-red-light: #ff7a75;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -71,7 +75,7 @@
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     background:
-      radial-gradient(circle at 15% 20%, rgba(194, 54, 49, 0.04) 0%, transparent 50%),
+      radial-gradient(circle at 15% 20%, rgba(45, 91, 206, 0.04) 0%, transparent 50%),
       radial-gradient(circle at 85% 80%, rgba(201, 168, 76, 0.04) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
@@ -92,12 +96,13 @@
   .upload-area .upload-icon { font-size: 2.8rem; margin-bottom: 12px; display: block; }
   .upload-area p { font-size: 1.05rem; color: var(--text-secondary); line-height: 1.5; }
   .upload-area .hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; }
-  input[type="file"] { display: none; }
+  input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
   .data-info { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
   .data-badge { background: var(--badge-bg); color: var(--vermillion); font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 500; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; }
   label { display: block; font-weight: 600; font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 6px; }
+  .label-emphasis { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
   select, input[type="number"], input[type="text"] { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Crimson Pro', serif; font-size: 16px; background: var(--input-bg); color: var(--text-primary); transition: border 0.2s, box-shadow 0.2s; appearance: auto; }
-  select:focus, input:focus { outline: none; border-color: var(--vermillion); box-shadow: 0 0 0 3px rgba(194, 54, 49, 0.1); }
+  select:focus, input:focus { outline: none; border-color: var(--vermillion); box-shadow: 0 0 0 3px rgba(45, 91, 206, 0.1); }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
   .form-group { margin-bottom: 14px; }
   .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -106,15 +111,15 @@
   .check-label input[type="checkbox"], .check-label input[type="radio"] { width: auto; accent-color: var(--vermillion); cursor: pointer; }
   .check-label.selected { border-color: var(--vermillion); background: var(--badge-bg); color: var(--vermillion); }
   .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 28px; border: none; border-radius: 10px; font-family: 'Crimson Pro', serif; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease; letter-spacing: 0.02em; }
-  .btn-primary { background: var(--vermillion); color: #fff; box-shadow: 0 3px 12px rgba(194, 54, 49, 0.25); }
-  .btn-primary:hover { background: var(--vermillion-light); box-shadow: 0 5px 18px rgba(194, 54, 49, 0.35); transform: translateY(-1px); }
+  .btn-primary { background: var(--vermillion); color: #fff; box-shadow: 0 3px 12px rgba(45, 91, 206, 0.25); }
+  .btn-primary:hover { background: var(--vermillion-light); box-shadow: 0 5px 18px rgba(45, 91, 206, 0.35); transform: translateY(-1px); }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
   .btn-secondary { background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); }
   .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--gold); }
   .btn-correct { background: var(--jade); color: #fff; box-shadow: 0 3px 12px rgba(45, 134, 89, 0.25); }
   .btn-correct:hover { background: var(--jade-light); transform: translateY(-1px); }
-  .btn-wrong { background: var(--vermillion); color: #fff; box-shadow: 0 3px 12px rgba(194, 54, 49, 0.25); }
-  .btn-wrong:hover { background: var(--vermillion-light); transform: translateY(-1px); }
+  .btn-wrong { background: var(--wrong-red); color: #fff; box-shadow: 0 3px 12px rgba(194, 54, 49, 0.25); }
+  .btn-wrong:hover { background: var(--wrong-red-light); transform: translateY(-1px); }
   .btn-gold { background: var(--gold); color: #fff; box-shadow: 0 3px 12px rgba(201, 168, 76, 0.3); }
   .btn-gold:hover { background: var(--gold-light); transform: translateY(-1px); }
   .btn-danger { background: #b71c1c; color: #fff; box-shadow: 0 3px 12px rgba(183, 28, 28, 0.25); }
@@ -153,13 +158,14 @@
   .stats-table .pinyin-cell { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--gold); }
   .stats-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--stat-bar-bg); min-width: 60px; }
   .stats-bar .bar-correct { background: var(--jade); transition: width 0.3s; }
-  .stats-bar .bar-wrong { background: var(--vermillion); transition: width 0.3s; }
+  .stats-bar .bar-wrong { background: var(--wrong-red); transition: width 0.3s; }
   .sort-btn { cursor: pointer; user-select: none; }
   .sort-btn:hover { color: var(--vermillion); }
   .chapter-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chapter-chip { padding: 7px 16px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; transition: all 0.2s; user-select: none; background: var(--input-bg); color: var(--text-secondary); }
+  .chapter-chip { padding: 7px 12px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; transition: all 0.2s; user-select: none; background: var(--input-bg); color: var(--text-secondary); display: inline-flex; align-items: center; gap: 6px; }
   .chapter-chip:hover { border-color: var(--gold); }
-  .chapter-chip.selected { background: var(--vermillion); color: #fff; border-color: var(--vermillion); }
+  .chapter-chip.selected { color: #fff; border-color: transparent; }
+  .chapter-chip .chip-pct { font-size: 0.7rem; opacity: 0.85; }
   .select-all-btn { font-size: 0.82rem; color: var(--vermillion); cursor: pointer; font-weight: 600; padding: 4px 0; border: none; background: none; font-family: 'Crimson Pro', serif; text-decoration: underline; text-underline-offset: 2px; }
   .select-all-btn:hover { color: var(--vermillion-light); }
   .column-map-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -191,7 +197,6 @@
   .expected-format code { font-family: 'JetBrains Mono', monospace; background: var(--badge-bg); color: var(--vermillion); padding: 1px 6px; border-radius: 4px; font-size: 0.8rem; }
   .hidden { display: none !important; }
 
-  /* Saved data banner */
   .saved-banner { background: linear-gradient(135deg, var(--jade), #1a6b44); color: #fff; border-radius: 12px; padding: 20px 24px; margin-bottom: 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
   .saved-banner .banner-icon { font-size: 2rem; flex-shrink: 0; }
   .saved-banner .banner-text { flex: 1; min-width: 150px; }
@@ -200,14 +205,12 @@
   .saved-banner .btn { background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
   .saved-banner .btn:hover { background: rgba(255,255,255,0.3); }
 
-  /* Save bar */
   .save-bar { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 14px 20px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 2px 12px var(--shadow); flex-wrap: wrap; }
   .save-bar .save-info { font-size: 0.88rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
   .save-bar .save-info .unsaved-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); display: inline-block; animation: pulse 1.5s ease-in-out infinite; }
   @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
   .save-bar .save-info .saved-check { color: var(--jade); font-weight: 600; }
 
-  /* Stats tabs */
   .stats-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 18px; overflow-x: auto; }
   .stats-tab { padding: 10px 18px; border: none; background: none; font-family: 'Crimson Pro', serif; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; }
   .stats-tab:hover { color: var(--text-primary); }
@@ -215,7 +218,6 @@
   .stats-tab-content { display: none; animation: fadeUp 0.25s ease-out; }
   .stats-tab-content.active { display: block; }
 
-  /* Chapter stats cards */
   .chapter-stats-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
   .chapter-stat-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 6px var(--shadow); transition: border 0.2s; cursor: pointer; }
   .chapter-stat-card:hover { border-color: var(--gold); }
@@ -225,28 +227,27 @@
   .chapter-stat-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   .chapter-stat-item { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary); }
   .chapter-stat-item strong { color: var(--text-primary); font-size: 1rem; }
-  .chapter-stat-item.wrong-count strong { color: var(--vermillion); }
+  .chapter-stat-item.wrong-count strong { color: var(--wrong-red); }
   .chapter-stat-item.correct-count strong { color: var(--jade); }
   .chapter-bar { flex: 1; min-width: 80px; height: 8px; border-radius: 4px; overflow: hidden; background: var(--stat-bar-bg); }
   .chapter-bar .bar-fill-correct { height: 100%; background: var(--jade); }
-  .chapter-bar .bar-fill-wrong { height: 100%; background: var(--vermillion); float: right; }
+  .chapter-bar .bar-fill-wrong { height: 100%; background: var(--wrong-red); float: right; }
 
-  /* Top wrong item */
   .wrong-list-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-bottom: 1px solid var(--border-light); transition: background 0.15s; }
   .wrong-list-item:last-child { border-bottom: none; }
   .wrong-list-item:hover { background: var(--bg-card-hover); }
   .wrong-rank { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; font-weight: 700; color: var(--text-muted); width: 28px; text-align: center; flex-shrink: 0; }
-  .wrong-rank.top3 { color: var(--vermillion); font-size: 1rem; }
+  .wrong-rank.top3 { color: var(--wrong-red); font-size: 1rem; }
+  .wrong-nums { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; flex-shrink: 0; min-width: 52px; }
   .wrong-word-info { flex: 1; min-width: 0; }
   .wrong-word-main { font-weight: 600; font-size: 1rem; }
   .wrong-word-main .chinese-cell { font-family: 'Noto Serif SC', serif; }
   .wrong-word-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
   .wrong-word-sub .pinyin-cell { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
   .wrong-stats { text-align: right; flex-shrink: 0; }
-  .wrong-stats .wrong-count-big { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--vermillion); }
+  .wrong-stats .wrong-count-big { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--wrong-red); }
   .wrong-stats .wrong-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
 
-  /* Chapter detail expand */
   .chapter-detail-questions { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-light); display: none; }
   .chapter-detail-questions.open { display: block; }
   .ch-q-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border-light); }
@@ -254,12 +255,50 @@
   .ch-q-nums { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); min-width: 52px; flex-shrink: 0; line-height: 1.3; }
   .ch-q-word { flex: 1; min-width: 0; }
   .ch-q-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); text-align: right; white-space: nowrap; }
-  .ch-q-stat.has-wrong { color: var(--vermillion); font-weight: 600; }
+  .ch-q-stat.has-wrong { color: var(--wrong-red); font-weight: 600; }
   .ch-q-stat.all-correct { color: var(--jade); }
 
-  /* Reset section */
+  .daily-goal-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 18px 20px; margin-bottom: 18px; box-shadow: 0 2px 12px var(--shadow); }
+  .daily-goal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .daily-goal-header h3 { font-family: 'Crimson Pro', serif; font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 7px; }
+  .daily-goal-progress { width: 100%; height: 10px; background: var(--stat-bar-bg); border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
+  .daily-goal-progress-fill { height: 100%; background: linear-gradient(90deg, var(--vermillion), var(--gold)); border-radius: 5px; transition: width 0.4s ease; }
+  .daily-goal-progress-fill.goal-met { background: var(--jade); }
+  .daily-goal-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .daily-goal-stat { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-secondary); }
+  .daily-goal-stat strong { color: var(--text-primary); }
+  .daily-goal-stat .streak-fire { color: #e67e22; }
+  .daily-goal-input { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  .daily-goal-input input { width: 56px; padding: 4px 8px; font-size: 16px; text-align: center; border-radius: 6px; }
+
+  .cg-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+  .cg-grid { display: inline-block; }
+  .cg-row { display: flex; align-items: center; margin-bottom: 1px; }
+  .cg-label { width: 34px; font-size: 0.62rem; text-align: right; padding-right: 4px; flex-shrink: 0; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .cg-cells { display: flex; gap: 1px; }
+  .cg-cell { width: 13px; height: 13px; border-radius: 2px; flex-shrink: 0; cursor: pointer; }
+  .cg-hdr { display: flex; gap: 1px; }
+  .cg-hdr-num { width: 13px; font-size: 7px; text-align: center; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; line-height: 1.2; }
+  .cg-legend { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; font-size: 0.8rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; }
+  .cg-legend-item { display: flex; align-items: center; gap: 5px; }
+  .cg-legend-swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+  .cg-summary { font-size: 0.82rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-bottom: 12px; }
+
   .reset-section { margin-top: 12px; padding: 16px; background: var(--bg-secondary); border-radius: 10px; border: 1px solid var(--border-light); }
   .reset-section p { font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+
+  /* Auth bar */
+  .auth-bar { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 10px 16px; display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .auth-bar .btn-auth { padding: 7px 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); font-family: 'Crimson Pro', serif; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .auth-bar .btn-auth:hover { border-color: var(--gold); background: var(--bg-card-hover); }
+  .auth-bar .auth-status { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); }
+  .sync-status { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); display: inline-flex; align-items: center; gap: 5px; }
+  .sync-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .sync-dot.synced { background: var(--jade); }
+  .sync-dot.syncing { background: var(--gold); animation: pulse 1s ease-in-out infinite; }
+  .sync-dot.error { background: var(--wrong-red); }
+  .btn-sync { padding: 5px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+  .btn-sync:hover { border-color: var(--gold); background: var(--bg-card-hover); }
 
   @media (max-width: 480px) {
     .app-header h1 { font-size: 1.6rem; }
@@ -280,11 +319,15 @@
 </style>
 </head>
 <body>
-<div style="text-align:center;padding:12px;background:#f5f0e8;border-bottom:1px solid #ddd;font-family:Arial;">
-  <button onclick="login()" style="padding:6px 14px;margin:4px;">Login with Google</button>
-  <button onclick="logout()" style="padding:6px 14px;margin:4px;">Logout</button>
-  <div id="userStatus" style="margin-top:6px;font-size:14px;">Checking login...</div>
+
+<div class="auth-bar">
+  <button class="btn-auth" onclick="login()">Login with Google</button>
+  <button class="btn-auth" onclick="logout()">Logout</button>
+  <span class="auth-status" id="userStatus">Checking login...</span>
+  <span class="sync-status hidden" id="syncStatus"></span>
+  <button class="btn-sync hidden" id="btn-cloud-sync" onclick="window._cloudSync && window._cloudSync()">&#9729; Sync</button>
 </div>
+
 <!--%%SAVED_DATA_START%%-->
 <script id="saved-data" type="application/json">null</script>
 <!--%%SAVED_DATA_END%%-->
@@ -299,17 +342,17 @@
   <!-- ===== SCREEN: Upload ===== -->
   <div id="screen-upload" class="screen active">
     <div class="saved-banner hidden" id="saved-banner">
-      <span class="banner-icon">✅</span>
+      <span class="banner-icon">&#10004;&#65039;</span>
       <div class="banner-text">
         <h3>Vocabulary Loaded</h3>
         <p id="saved-banner-detail"></p>
       </div>
-      <button class="btn" id="btn-use-saved">Start Learning →</button>
+      <button class="btn" id="btn-use-saved">Start Learning &#8594;</button>
     </div>
     <div class="card" id="upload-card">
-      <div class="card-title"><span class="icon">📂</span> <span id="upload-card-title">Load Vocabulary</span></div>
+      <div class="card-title"><span class="icon">&#128194;</span> <span id="upload-card-title">Load Vocabulary</span></div>
       <div class="upload-area" id="upload-area">
-        <span class="upload-icon">📄</span>
+        <span class="upload-icon">&#128196;</span>
         <p>Drop your Excel file here<br>or tap to browse</p>
         <p class="hint">.xlsx or .xls files supported</p>
       </div>
@@ -321,7 +364,7 @@
       </div>
     </div>
     <div class="card hidden" id="mapping-card">
-      <div class="card-title"><span class="icon">🔗</span> Column Mapping</div>
+      <div class="card-title"><span class="icon">&#128279;</span> Column Mapping</div>
       <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:14px;">Verify or adjust which spreadsheet column maps to each field.</p>
       <div class="column-map-grid" id="mapping-grid"></div>
       <div class="data-info" id="data-info"></div>
@@ -337,12 +380,25 @@
       <div class="save-info" id="save-info">
         <span class="unsaved-dot"></span> <span>Unsaved changes</span>
       </div>
-      <button class="btn btn-gold" id="btn-save-app" style="padding:9px 20px;font-size:0.92rem;">💾 Save App</button>
+      <button class="btn btn-gold" id="btn-save-app" style="padding:9px 20px;font-size:0.92rem;">&#128190; Save App</button>
+    </div>
+    <div class="daily-goal-card" id="daily-goal-card">
+      <div class="daily-goal-header">
+        <h3>&#127919; Daily Goal</h3>
+        <div class="daily-goal-input">
+          Target: <input type="number" id="daily-goal-input" min="1" max="999" value="50"> Q
+        </div>
+      </div>
+      <div class="daily-goal-progress"><div class="daily-goal-progress-fill" id="daily-progress-fill" style="width:0%"></div></div>
+      <div class="daily-goal-row">
+        <span class="daily-goal-stat">Today: <strong id="daily-answered">0</strong> / <strong id="daily-goal-val">50</strong></span>
+        <span class="daily-goal-stat"><span class="streak-fire">&#128293;</span> Streak: <strong id="daily-streak">0</strong> days</span>
+      </div>
     </div>
     <div class="card">
-      <div class="card-title"><span class="icon">⚙️</span> Quiz Settings</div>
+      <div class="card-title"><span class="icon">&#9881;&#65039;</span> Quiz Settings</div>
       <div class="form-group">
-        <label>Select Chapters</label>
+        <label class="label-emphasis">Select Chapters</label>
         <div style="margin-bottom:6px;">
           <button class="select-all-btn" id="btn-select-all">Select All</button> &nbsp;/&nbsp;
           <button class="select-all-btn" id="btn-deselect-all">Deselect All</button>
@@ -360,7 +416,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Question shows…</label>
+        <label class="label-emphasis">Question shows&#8230;</label>
         <div class="checkbox-group" id="question-mode-group">
           <label class="check-label selected"><input type="radio" name="questionMode" value="english" checked> English</label>
           <label class="check-label"><input type="radio" name="questionMode" value="pinyin"> Pinyin</label>
@@ -369,7 +425,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Answer shows…</label>
+        <label class="label-emphasis">Answer shows&#8230;</label>
         <div class="checkbox-group" id="answer-mode-group">
           <label class="check-label"><input type="radio" name="answerMode" value="english"> English</label>
           <label class="check-label"><input type="radio" name="answerMode" value="pinyin"> Pinyin</label>
@@ -381,24 +437,24 @@
         <label style="margin-bottom:0;">Shuffle questions</label>
         <div class="toggle-switch"><input type="checkbox" id="shuffle-toggle" checked><span class="toggle-slider"></span></div>
       </div>
-      <div class="toggle-row">
-        <label style="margin-bottom:0;">Prioritize weak questions</label>
-        <div class="toggle-switch"><input type="checkbox" id="prioritize-weak"><span class="toggle-slider"></span></div>
-      </div>
       <div id="config-question-count" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;color:var(--text-muted);margin-bottom:4px;"></div>
-      <div class="btn-group">
-        <button class="btn btn-secondary" id="btn-back-upload">← Change / Add Words</button>
-        <button class="btn btn-primary" id="btn-start-quiz">Start Quiz</button>
-      </div>
-      <button class="btn btn-wrong btn-block" id="btn-practice-mistakes" style="margin-top:10px;">✗ Practice All Mistakes</button>
+      <button class="btn btn-primary btn-block" id="btn-start-quiz" style="font-size:1.14rem;padding:14px 20px;">Start Quiz</button>
+      <button class="btn btn-secondary btn-block" id="btn-unanswered" style="margin-top:10px;">&#10067; Unanswered Questions Only</button>
+      <div id="unanswered-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
+      <button class="btn btn-wrong btn-block" id="btn-practice-mistakes" style="margin-top:10px;">&#10007; Practice Mistakes</button>
       <div id="mistakes-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
+      <button class="btn btn-block" id="btn-practice-hardest" style="margin-top:10px;background:linear-gradient(135deg,#e67e22,#d35400);color:#fff;box-shadow:0 3px 12px rgba(230,126,34,0.25);">&#128293; Practice Top 25% Hardest</button>
+      <div id="hardest-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
+      <button class="btn btn-correct btn-block" id="btn-config-stats" style="margin-top:10px;">&#128200; View Statistics</button>
+      <button class="btn btn-secondary btn-block" id="btn-back-upload" style="margin-top:10px;">&#128221; Change Word Database</button>
+      <button class="btn btn-danger btn-block" id="btn-config-reset" style="margin-top:10px;">&#128465;&#65039; Reset All Statistics</button>
     </div>
   </div>
 
   <!-- ===== SCREEN: Quiz ===== -->
   <div id="screen-quiz" class="screen">
-    <div class="quiz-top-bar">
-      <button class="back-link" id="btn-quit-quiz">← Back to Settings</button>
+    <div class="card" style="padding:12px 20px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+      <button class="btn btn-primary" id="btn-quit-quiz" style="padding:9px 18px;font-size:0.95rem;">&#8592; Back</button>
       <span class="session-indicator" id="session-indicator"></span>
     </div>
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
@@ -412,8 +468,8 @@
     <div id="quiz-actions"><button class="btn btn-primary btn-block" id="btn-show-answer">Reveal Answer</button></div>
     <div id="quiz-judge" class="hidden">
       <div class="btn-group">
-        <button class="btn btn-correct" id="btn-correct">✓ I got it right</button>
-        <button class="btn btn-wrong" id="btn-wrong">✗ I got it wrong</button>
+        <button class="btn btn-correct" id="btn-correct">&#10003; I got it right</button>
+        <button class="btn btn-wrong" id="btn-wrong">&#10007; I got it wrong</button>
       </div>
     </div>
   </div>
@@ -421,10 +477,10 @@
   <!-- ===== SCREEN: Results ===== -->
   <div id="screen-results" class="screen">
     <div class="card">
-      <div class="card-title"><span class="icon">📊</span> Session Results</div>
+      <div class="card-title"><span class="icon">&#128202;</span> Session Results</div>
       <div class="stats-summary" id="results-summary"></div>
       <div class="btn-group">
-        <button class="btn btn-secondary" id="btn-results-settings">← Settings</button>
+        <button class="btn btn-primary" id="btn-results-settings">&#8592; Back</button>
         <button class="btn btn-primary" id="btn-results-retry">Retry Mistakes</button>
         <button class="btn btn-secondary" id="btn-results-stats">Full Stats</button>
       </div>
@@ -433,12 +489,12 @@
 
   <!-- ===== SCREEN: Statistics ===== -->
   <div id="screen-stats" class="screen">
-    <div class="quiz-top-bar">
-      <button class="back-link" id="btn-stats-back">← Back</button>
+    <div class="card" style="padding:14px 20px;margin-bottom:14px;">
+      <button class="btn btn-primary btn-block" id="btn-stats-back">&#8592; Back</button>
     </div>
 
     <div class="card">
-      <div class="card-title"><span class="icon">📈</span> Lifetime Statistics</div>
+      <div class="card-title"><span class="icon">&#128200;</span> Lifetime Statistics</div>
       <div class="stats-summary" id="lifetime-summary"></div>
     </div>
 
@@ -446,34 +502,27 @@
       <button class="stats-tab active" data-tab="tab-chapters">By Chapter</button>
       <button class="stats-tab" data-tab="tab-top-wrong">Top 30 Wrong</button>
       <button class="stats-tab" data-tab="tab-all">All Questions</button>
+      <button class="stats-tab" data-tab="tab-completion">Completion</button>
+      <button class="stats-tab" data-tab="tab-backup">Backup</button>
       <button class="stats-tab" data-tab="tab-reset">Reset</button>
     </div>
 
-    <!-- TAB: By Chapter -->
     <div class="stats-tab-content active" id="tab-chapters">
       <div class="chapter-stats-grid" id="chapter-stats-grid"></div>
-      <div class="empty-state hidden" id="chapter-stats-empty">
-        <div class="empty-icon">📭</div>
-        <p>No chapter data to display yet.</p>
-      </div>
+      <div class="empty-state hidden" id="chapter-stats-empty"><div class="empty-icon">&#128237;</div><p>No chapter data to display yet.</p></div>
     </div>
 
-    <!-- TAB: Top 30 Wrong -->
     <div class="stats-tab-content" id="tab-top-wrong">
       <div class="card">
-        <div class="card-title"><span class="icon">🔥</span> Most Missed Questions</div>
+        <div class="card-title"><span class="icon">&#128293;</span> Most Missed Questions</div>
         <div id="top-wrong-list"></div>
-        <div class="empty-state hidden" id="top-wrong-empty">
-          <div class="empty-icon">🎉</div>
-          <p>No wrong answers yet — keep it up!</p>
-        </div>
+        <div class="empty-state hidden" id="top-wrong-empty"><div class="empty-icon">&#127881;</div><p>No wrong answers yet &#8212; keep it up!</p></div>
       </div>
     </div>
 
-    <!-- TAB: All Questions -->
     <div class="stats-tab-content" id="tab-all">
       <div class="card">
-        <div class="card-title"><span class="icon">🔍</span> Question Details</div>
+        <div class="card-title"><span class="icon">&#128269;</span> Question Details</div>
         <div class="filter-row">
           <select id="stats-filter-chapter"><option value="all">All Chapters</option></select>
           <select id="stats-filter-status">
@@ -495,27 +544,43 @@
             <tbody id="stats-tbody"></tbody>
           </table>
         </div>
-        <div class="empty-state hidden" id="stats-empty">
-          <div class="empty-icon">📭</div>
-          <p>No questions match the current filter.</p>
+        <div class="empty-state hidden" id="stats-empty"><div class="empty-icon">&#128237;</div><p>No questions match the current filter.</p></div>
+      </div>
+    </div>
+
+    <div class="stats-tab-content" id="tab-completion">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128506;&#65039;</span> Completion Overview</div>
+        <div class="cg-legend">
+          <span class="cg-legend-item"><span class="cg-legend-swatch" style="background:var(--jade);"></span> Correct</span>
+          <span class="cg-legend-item"><span class="cg-legend-swatch" style="background:var(--wrong-red);"></span> Wrong</span>
+          <span class="cg-legend-item"><span class="cg-legend-swatch" style="background:var(--bg-card);border:1.5px solid var(--text-muted);"></span> Not tried</span>
+        </div>
+        <div class="cg-summary" id="cg-summary"></div>
+        <div class="cg-wrapper" id="completion-wrapper"></div>
+      </div>
+    </div>
+
+    <div class="stats-tab-content" id="tab-backup">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#128190;</span> Backup &amp; Restore</div>
+        <p style="font-size:0.88rem;color:var(--text-secondary);line-height:1.5;margin-bottom:14px;">Export your statistics as a CSV file. Import CSV to restore stats.</p>
+        <button class="btn btn-primary btn-block" id="btn-export-stats" style="margin-bottom:12px;">&#128228; Export Stats as CSV</button>
+        <div style="border-top:1px solid var(--border-light);padding-top:14px;">
+          <input type="file" id="import-stats-input" accept=".csv">
+          <button class="btn btn-secondary btn-block" id="btn-import-stats">&#128229; Import Stats from CSV</button>
+          <div id="import-stats-status" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:8px;"></div>
         </div>
       </div>
     </div>
 
-    <!-- TAB: Reset -->
     <div class="stats-tab-content" id="tab-reset">
       <div class="card">
-        <div class="card-title"><span class="icon">🗑️</span> Reset Statistics</div>
+        <div class="card-title"><span class="icon">&#128465;&#65039;</span> Reset Statistics</div>
         <div class="reset-section">
-          <p>This will permanently erase all your answer history — every correct/wrong count for every question. Your vocabulary words will remain, only the statistics are cleared.</p>
+          <p>This will permanently erase all your answer history. Your vocabulary words will remain, only statistics are cleared.</p>
           <button class="btn btn-danger btn-block" id="btn-reset-stats">Reset All Statistics</button>
         </div>
-      </div>
-    </div>
-
-    <div class="card" style="margin-top:8px;">
-      <div class="btn-group" style="margin-top:0;">
-        <button class="btn btn-secondary btn-block" id="btn-export-stats">Export Stats as CSV</button>
       </div>
     </div>
   </div>
@@ -551,6 +616,9 @@
   var lastScreen = "config";
   var statsSortField = "chapter";
   var statsSortAsc = true;
+  var dailyLog = {};
+  var dailyGoal = 50;
+  var singleQuestionMode = false;
 
   /* ========== HELPERS ========== */
   function $(id) { return document.getElementById(id); }
@@ -572,7 +640,8 @@
     return q[col] != null ? String(q[col]).trim() : "";
   }
   function ensureStats(key) {
-    if (!stats[key]) stats[key] = { seen: 0, correct: 0, wrong: 0 };
+    if (!stats[key]) stats[key] = { seen: 0, correct: 0, wrong: 0, streak: 0 };
+    if (stats[key].streak === undefined) stats[key].streak = 0;
   }
   function shuffleArray(arr) {
     var a = arr.slice();
@@ -583,36 +652,97 @@
     var div = document.createElement("div"); div.appendChild(document.createTextNode(text)); return div.innerHTML;
   }
   function markUnsaved() {
-    $("save-info").innerHTML = "<span class=\"unsaved-dot\"></span> <span>Unsaved changes</span>";
+    $("save-info").innerHTML = '<span class="unsaved-dot"></span> <span>Unsaved changes</span>';
   }
   function markSaved() {
-    $("save-info").innerHTML = "<span class=\"saved-check\">\u2713</span> <span>All data saved</span>";
+    $("save-info").innerHTML = '<span class="saved-check">\u2713</span> <span>All data saved</span>';
+  }
+  function getTodayKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+  function recordDailyAnswer(isCorrect) {
+    var key = getTodayKey();
+    if (!dailyLog[key]) dailyLog[key] = { answered: 0, correct: 0, wrong: 0 };
+    dailyLog[key].answered++;
+    if (isCorrect) dailyLog[key].correct++; else dailyLog[key].wrong++;
+  }
+  function getDailyStreak() {
+    var streak = 0; var d = new Date();
+    var todayLog = dailyLog[getTodayKey()];
+    if (todayLog && todayLog.answered >= dailyGoal) streak = 1;
+    d.setDate(d.getDate() - 1);
+    for (var i = 0; i < 365; i++) {
+      var dk = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+      var dl = dailyLog[dk];
+      if (dl && dl.answered >= dailyGoal) { streak++; d.setDate(d.getDate() - 1); }
+      else break;
+    }
+    return streak;
+  }
+  function updateDailyGoalDisplay() {
+    var todayLog = dailyLog[getTodayKey()] || { answered: 0 };
+    var answered = todayLog.answered;
+    var pct = dailyGoal > 0 ? Math.min(100, Math.round((answered / dailyGoal) * 100)) : 0;
+    $("daily-answered").textContent = answered;
+    $("daily-goal-val").textContent = dailyGoal;
+    $("daily-goal-input").value = dailyGoal;
+    var fill = $("daily-progress-fill");
+    fill.style.width = pct + "%";
+    if (answered >= dailyGoal) fill.classList.add("goal-met"); else fill.classList.remove("goal-met");
+    $("daily-streak").textContent = getDailyStreak();
+  }
+
+  /* ========== LOCAL STORAGE AUTO-SAVE ========== */
+  var canUseLocalStorage = false;
+  var LOCAL_STORAGE_KEY = "hanyu_xuexi_autosave";
+  var _ls = null;
+  try { _ls = window["local" + "Storage"]; _ls.setItem("__test__", "1"); _ls.removeItem("__test__"); canUseLocalStorage = true; } catch (e) { canUseLocalStorage = false; }
+
+  function autoSaveToStorage() {
+    if (!canUseLocalStorage || allQuestions.length === 0) return;
+    try { _ls.setItem(LOCAL_STORAGE_KEY, generateSaveData()); } catch (e) { /* silently fail */ }
+  }
+  function loadFromLocalStorage() {
+    if (!canUseLocalStorage) return false;
+    try {
+      var raw = _ls.getItem(LOCAL_STORAGE_KEY);
+      if (!raw) return false;
+      var saved = JSON.parse(raw);
+      if (!saved || !saved.questions || saved.questions.length === 0) return false;
+      return saved;
+    } catch (e) { return false; }
   }
 
   /* ========== LOAD SAVED DATA ========== */
   function loadSavedData() {
+    var embeddedData = null; var localData = null;
     try {
-      var el = $("saved-data"); if (!el) return false;
-      var raw = el.textContent.trim();
-      if (raw === "null" || raw === "") return false;
-      var saved = JSON.parse(raw);
-      if (!saved || !saved.questions || saved.questions.length === 0) return false;
-      allQuestions = saved.questions.map(function(row, idx) { row._index = idx; return row; });
-      columnMap = saved.columnMap || columnMap;
-      stats = saved.stats || {};
-      availableColumns = saved.availableColumns || Object.keys(allQuestions[0]).filter(function(k) { return k !== "_index"; });
-      return true;
-    } catch (e) { return false; }
+      var el = $("saved-data"); if (el) {
+        var raw = el.textContent.trim();
+        if (raw !== "null" && raw !== "") {
+          var parsed = JSON.parse(raw);
+          if (parsed && parsed.questions && parsed.questions.length > 0) embeddedData = parsed;
+        }
+      }
+    } catch (e) { /* ignore */ }
+    localData = loadFromLocalStorage();
+    var saved = null;
+    if (embeddedData && localData) {
+      var embDate = embeddedData.savedAt ? new Date(embeddedData.savedAt).getTime() : 0;
+      var locDate = localData.savedAt ? new Date(localData.savedAt).getTime() : 0;
+      saved = (locDate > embDate) ? localData : embeddedData;
+    } else { saved = embeddedData || localData; }
+    if (!saved) return false;
+    allQuestions = saved.questions.map(function(row, idx) { row._index = idx; return row; });
+    columnMap = saved.columnMap || columnMap;
+    stats = saved.stats || {};
+    availableColumns = saved.availableColumns || Object.keys(allQuestions[0]).filter(function(k) { return k !== "_index"; });
+    dailyLog = saved.dailyLog || {};
+    dailyGoal = saved.dailyGoal || 50;
+    return true;
   }
-
   var hasSavedData = loadSavedData();
-  if (hasSavedData) {
-    var chapters = getUniqueChapters();
-    $("saved-banner").classList.remove("hidden");
-    $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 Stats preserved";
-    $("upload-card-title").textContent = "Upload New / Updated Words";
-    markSaved();
-  }
 
   /* ========== SAVE APP ========== */
   function generateSaveData() {
@@ -621,20 +751,26 @@
       for (var i = 0; i < keys.length; i++) { if (keys[i] !== "_index") copy[keys[i]] = q[keys[i]]; }
       return copy;
     });
-    return JSON.stringify({ questions: cleanQuestions, columnMap: columnMap, stats: stats, availableColumns: availableColumns, savedAt: new Date().toISOString() });
+    return JSON.stringify({ questions: cleanQuestions, columnMap: columnMap, stats: stats, availableColumns: availableColumns, dailyLog: dailyLog, dailyGoal: dailyGoal, savedAt: new Date().toISOString() });
   }
   function saveApp() {
+    var wasDark = document.documentElement.classList.contains("dark");
+    if (wasDark) document.documentElement.classList.remove("dark");
     var htmlSource = document.documentElement.outerHTML;
+    if (wasDark) document.documentElement.classList.add("dark");
     var newDataJson = generateSaveData();
+    var closeTag = "<" + "/" + "script>";
+    var safeClose = "<" + "\\/" + "script>";
+    var safeJson = newDataJson.split(closeTag).join(safeClose);
     var startMarker = "<!--%%SAVED_DATA_START%%-->"; var endMarker = "<!--%%SAVED_DATA_END%%-->";
     var startIdx = htmlSource.indexOf(startMarker); var endIdx = htmlSource.indexOf(endMarker);
     if (startIdx === -1 || endIdx === -1) { showToast("Error: Could not locate save markers."); return; }
-    var before = htmlSource.substring(0, startIdx + startMarker.length);
+    var htmlTagEnd = htmlSource.indexOf(">");
+    if (htmlTagEnd === -1) { showToast("Error: Could not parse HTML."); return; }
+    var before = htmlSource.substring(htmlTagEnd + 1, startIdx + startMarker.length);
     var after = htmlSource.substring(endIdx);
-    var newHtml = "<!DOCTYPE html>\n<html lang=\"en\">" +
-      before.substring(before.indexOf("<html lang=\"en\">") + "<html lang=\"en\">".length) +
-      "\n<script id=\"saved-data\" type=\"application/json\">" + newDataJson + "<\/script>\n" + after;
-    if (newHtml.indexOf("<!DOCTYPE html>") !== 0) newHtml = "<!DOCTYPE html>\n" + newHtml;
+    var newHtml = '<!DOCTYPE html>\n<html lang="en">' + before +
+      '\n<script id="saved-data" type="application/json">' + safeJson + '<\/script>\n' + after;
     var blob = new Blob([newHtml], { type: "text/html" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a"); a.href = url;
@@ -643,7 +779,7 @@
     a.download = "\u6C49\u8BED\u5B66\u4E60_Chinese_Learning_Tool_" + ts + ".html";
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    markSaved();
+    autoSaveToStorage(); markSaved();
     showToast("App saved! Open the downloaded file to continue.");
   }
   $("btn-save-app").addEventListener("click", saveApp);
@@ -704,7 +840,7 @@
         columnMap.pinyin = detected.pinyin || ""; columnMap.character = detected.character || "";
         columnMap.combined = detected.combined || "";
         buildMappingUI(); $("mapping-card").classList.remove("hidden"); markUnsaved();
-        showToast("Loaded " + allQuestions.length + " questions from \"" + file.name + "\"");
+        showToast('Loaded ' + allQuestions.length + ' questions from "' + file.name + '"');
       } catch (err) { showToast("Error: " + err.message); }
     };
     reader.readAsArrayBuffer(file);
@@ -731,7 +867,7 @@
       group.appendChild(sel); grid.appendChild(group);
     }
     var info = $("data-info"); var ch = getUniqueChapters();
-    info.innerHTML = "<span class=\"data-badge\">\ud83d\udcdd " + allQuestions.length + " questions</span><span class=\"data-badge\">\ud83d\udcd6 " + ch.length + " chapters</span>";
+    info.innerHTML = '<span class="data-badge">\ud83d\udcdd ' + allQuestions.length + ' questions</span><span class="data-badge">\ud83d\udcd6 ' + ch.length + ' chapters</span>';
   }
 
   function getUniqueChapters() {
@@ -750,34 +886,111 @@
     for (var i = 0; i < fields.length; i++) { var sel = $("map-" + fields[i]); if (sel) columnMap[fields[i]] = sel.value; }
     if (!columnMap.english && !columnMap.pinyin && !columnMap.character) { showToast("Please map at least one language column."); return; }
     markUnsaved(); buildConfigScreen(); switchScreen("config");
+    if (window._chineseApp && window._chineseApp.onDataChanged) window._chineseApp.onDataChanged();
   });
 
   /* ========== CONFIG SCREEN ========== */
+  var allChaptersList = [];
+  var selectedChaptersSet = {};
+
+  function getChapterAccuracy(chapterName) {
+    var seen = 0; var correct = 0;
+    for (var i = 0; i < allQuestions.length; i++) {
+      if (getField(allQuestions[i], "chapter") !== chapterName) continue;
+      var key = getQuestionKey(allQuestions[i]);
+      var s = stats[key];
+      if (s) { seen += s.seen; correct += s.correct; }
+    }
+    if (seen === 0) return -1;
+    return Math.round((correct / seen) * 100);
+  }
+
+  function accuracyToColor(pct, isDark) {
+    if (pct === -1) return isDark ? "#3a6bd4" : "#2d5bce";
+    var r, g, b;
+    if (pct <= 50) { r = isDark ? 220 : 190; g = Math.round((isDark ? 70 : 40) + (pct / 50) * (isDark ? 150 : 140)); b = isDark ? 60 : 40; }
+    else { r = Math.round((isDark ? 220 : 190) - ((pct - 50) / 50) * (isDark ? 170 : 150)); g = isDark ? 220 : 180; b = isDark ? 60 : 40; }
+    if (pct >= 90) { r = isDark ? 50 : 35; g = isDark ? 190 : 150; b = isDark ? 90 : 65; }
+    if (pct <= 10) { r = isDark ? 210 : 180; g = isDark ? 55 : 40; b = isDark ? 55 : 40; }
+    return "rgb(" + r + "," + g + "," + b + ")";
+  }
+
+  function syncChipStyles() {
+    var chips = document.querySelectorAll(".chapter-chip");
+    var isDark = document.documentElement.classList.contains("dark");
+    for (var i = 0; i < chips.length; i++) {
+      var ch = chips[i].dataset.chapter;
+      var pct = getChapterAccuracy(ch);
+      var color = accuracyToColor(pct, isDark);
+      if (selectedChaptersSet[ch]) {
+        chips[i].classList.add("selected"); chips[i].style.background = color; chips[i].style.borderColor = color;
+      } else {
+        chips[i].classList.remove("selected"); chips[i].style.background = ""; chips[i].style.borderColor = "";
+      }
+      var badge = chips[i].querySelector(".chip-pct");
+      if (badge) { badge.textContent = pct === -1 ? "" : pct + "%"; }
+    }
+  }
+
+  function countSelectedChapters() {
+    var count = 0;
+    for (var i = 0; i < allChaptersList.length; i++) { if (selectedChaptersSet[allChaptersList[i]]) count++; }
+    return count;
+  }
+
   function buildConfigScreen() {
-    var chapters = getUniqueChapters(); var container = $("chapter-chips"); container.innerHTML = "";
-    for (var i = 0; i < chapters.length; i++) {
+    allChaptersList = getUniqueChapters();
+    selectedChaptersSet = {};
+    for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = true;
+    var container = $("chapter-chips"); container.innerHTML = "";
+    for (var j = 0; j < allChaptersList.length; j++) {
       var chip = document.createElement("span"); chip.className = "chapter-chip selected";
-      chip.textContent = chapters[i]; chip.dataset.chapter = chapters[i];
-      chip.addEventListener("click", function() { this.classList.toggle("selected"); updateQuestionCount(); });
+      chip.dataset.chapter = allChaptersList[j];
+      chip.innerHTML = escapeHtml(allChaptersList[j]) + ' <span class="chip-pct"></span>';
+      chip.addEventListener("click", function() {
+        var clickedCh = this.dataset.chapter;
+        var selCount = countSelectedChapters();
+        if (selCount === allChaptersList.length) {
+          for (var ci = 0; ci < allChaptersList.length; ci++) selectedChaptersSet[allChaptersList[ci]] = false;
+          selectedChaptersSet[clickedCh] = true;
+        } else if (selCount === 1 && selectedChaptersSet[clickedCh]) {
+          for (var cj = 0; cj < allChaptersList.length; cj++) selectedChaptersSet[allChaptersList[cj]] = true;
+        } else {
+          selectedChaptersSet[clickedCh] = !selectedChaptersSet[clickedCh];
+        }
+        syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+      });
       container.appendChild(chip);
     }
-    updateQuestionCount();
-    updateMistakesCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay();
     $("range-to").value = allQuestions.length; $("range-to").max = allQuestions.length; $("range-from").max = allQuestions.length;
   }
-  $("btn-select-all").addEventListener("click", function() { var c = document.querySelectorAll(".chapter-chip"); for (var i = 0; i < c.length; i++) c[i].classList.add("selected"); updateQuestionCount(); });
-  $("btn-deselect-all").addEventListener("click", function() { var c = document.querySelectorAll(".chapter-chip"); for (var i = 0; i < c.length; i++) c[i].classList.remove("selected"); updateQuestionCount(); });
+  $("daily-goal-input").addEventListener("change", function() {
+    var val = parseInt(this.value); if (isNaN(val) || val < 1) val = 1; if (val > 999) val = 999;
+    this.value = val; dailyGoal = val; updateDailyGoalDisplay(); markUnsaved(); autoSaveToStorage();
+  });
+  $("btn-select-all").addEventListener("click", function() {
+    for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = true;
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+  });
+  $("btn-deselect-all").addEventListener("click", function() {
+    for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = false;
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+  });
 
   function getSelectedChapters() {
-    var chips = document.querySelectorAll(".chapter-chip.selected"); var r = [];
-    for (var i = 0; i < chips.length; i++) r.push(chips[i].dataset.chapter); return r;
+    var r = [];
+    for (var i = 0; i < allChaptersList.length; i++) { if (selectedChaptersSet[allChaptersList[i]]) r.push(allChaptersList[i]); }
+    return r;
   }
   function getFilteredQuestions() {
-    var sc = getSelectedChapters(); var from = parseInt($("range-from").value) || 1; var to = parseInt($("range-to").value) || allQuestions.length;
+    var sc = getSelectedChapters(); if (sc.length === 0) return [];
+    var from = parseInt($("range-from").value) || 1; var to = parseInt($("range-to").value) || allQuestions.length;
+    var scMap = {}; for (var si = 0; si < sc.length; si++) scMap[sc[si]] = true;
     var f = [];
     for (var i = 0; i < allQuestions.length; i++) {
       var q = allQuestions[i]; var ch = getField(q, "chapter"); var num = parseInt(getField(q, "overallQ")) || (i + 1);
-      if ((sc.length === 0 || sc.indexOf(ch) !== -1) && num >= from && num <= to) f.push(q);
+      if (scMap[ch] && num >= from && num <= to) f.push(q);
     }
     return f;
   }
@@ -802,91 +1015,114 @@
   setupRadioStyling("question-mode-group");
   setupRadioStyling("answer-mode-group");
 
-  /* ========== START QUIZ (with smart weighting) ========== */
+  /* ========== AUTO-NAVIGATE IF SAVED DATA ========== */
+  if (hasSavedData) { buildConfigScreen(); switchScreen("config"); markSaved(); }
+
+  /* ========== START QUIZ ========== */
   $("btn-start-quiz").addEventListener("click", function() {
     var filtered = getFilteredQuestions();
     if (filtered.length === 0) { showToast("No questions match your selection."); return; }
-
     quizQuestionMode = document.querySelector("input[name='questionMode']:checked").value;
     quizAnswerMode = document.querySelector("input[name='answerMode']:checked").value;
-    var shouldShuffle = $("shuffle-toggle").checked;
-    var prioritizeWeak = $("prioritize-weak").checked;
-
-    // Smart weighting: correctly-answered questions appear 30% less
     var weighted = [];
     for (var i = 0; i < filtered.length; i++) {
-      var q = filtered[i];
-      var key = getQuestionKey(q);
-      var s = stats[key];
-      // If question has been answered and NEVER wrong (all correct), 30% chance to skip
+      var q = filtered[i]; var key = getQuestionKey(q); var s = stats[key];
       var isAllCorrect = s && s.seen > 0 && s.wrong === 0;
-      if (isAllCorrect && Math.random() < 0.3) {
-        continue; // skip this question 30% of the time
-      }
+      if (isAllCorrect && Math.random() < 0.3) continue;
       weighted.push(q);
     }
-    // Safety: always include at least 1 question
     if (weighted.length === 0) weighted = filtered.slice();
-
-    quizQueue = shouldShuffle ? shuffleArray(weighted) : weighted.slice();
-
-    if (prioritizeWeak) {
-      quizQueue.sort(function(a, b) {
-        var sa = stats[getQuestionKey(a)] || { seen: 0, wrong: 0 };
-        var sb = stats[getQuestionKey(b)] || { seen: 0, wrong: 0 };
-        var wd = sb.wrong - sa.wrong; if (wd !== 0) return wd;
-        return sa.seen - sb.seen;
-      });
-    }
-
-    quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = []; lastScreen = "config";
+    quizQueue = $("shuffle-toggle").checked ? shuffleArray(weighted) : weighted.slice();
+    quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = []; singleQuestionMode = false; lastScreen = "config";
     switchScreen("quiz"); showQuestion();
   });
 
-  /* ========== PRACTICE ALL MISTAKES ========== */
+  /* ========== PRACTICE MODES ========== */
   function getWrongQuestions() {
+    var sc = getSelectedChapters(); var scMap = {};
+    for (var si = 0; si < sc.length; si++) scMap[sc[si]] = true;
+    var allSelected = sc.length === allChaptersList.length;
     var wrong = [];
     for (var i = 0; i < allQuestions.length; i++) {
-      var key = getQuestionKey(allQuestions[i]);
-      var s = stats[key];
-      if (s && s.wrong > 0) wrong.push(allQuestions[i]);
+      var q = allQuestions[i];
+      if (!allSelected) { var ch = getField(q, "chapter"); if (!scMap[ch]) continue; }
+      var key = getQuestionKey(q); var s = stats[key];
+      if (s && s.seen > 0 && s.streak === 0) wrong.push(q);
     }
     return wrong;
   }
-  function updateMistakesCount() {
-    var wrong = getWrongQuestions();
-    var el = $("mistakes-count");
-    var btn = $("btn-practice-mistakes");
-    if (wrong.length === 0) {
-      el.textContent = "No wrong answers recorded yet";
-      btn.disabled = true;
-    } else {
-      el.textContent = wrong.length + " question" + (wrong.length !== 1 ? "s" : "") + " answered wrong across all chapters";
-      btn.disabled = false;
+  function getUnansweredQuestions() {
+    var sc = getSelectedChapters(); if (sc.length === 0) return [];
+    var scMap = {}; for (var si = 0; si < sc.length; si++) scMap[sc[si]] = true;
+    var unanswered = [];
+    for (var i = 0; i < allQuestions.length; i++) {
+      var q = allQuestions[i]; var ch = getField(q, "chapter"); if (!scMap[ch]) continue;
+      var key = getQuestionKey(q); var s = stats[key];
+      if (!s || s.seen === 0) unanswered.push(q);
     }
+    return unanswered;
   }
-  $("btn-practice-mistakes").addEventListener("click", function() {
-    var wrong = getWrongQuestions();
-    if (wrong.length === 0) { showToast("No wrong answers to practice!"); return; }
+  function getHardestQuestions() {
+    var sc = getSelectedChapters(); if (sc.length === 0) return [];
+    var scMap = {}; for (var si = 0; si < sc.length; si++) scMap[sc[si]] = true;
+    var answered = [];
+    for (var i = 0; i < allQuestions.length; i++) {
+      var q = allQuestions[i]; var ch = getField(q, "chapter"); if (!scMap[ch]) continue;
+      var key = getQuestionKey(q); var s = stats[key];
+      if (s && s.seen > 0) { answered.push({ q: q, rate: s.wrong / s.seen, wrong: s.wrong }); }
+    }
+    if (answered.length === 0) return [];
+    answered.sort(function(a, b) { if (b.rate !== a.rate) return b.rate - a.rate; return b.wrong - a.wrong; });
+    var count = Math.max(1, Math.ceil(answered.length * 0.25));
+    var result = []; for (var j = 0; j < count; j++) result.push(answered[j].q);
+    return result;
+  }
+  function updateMistakesCount() {
+    var wrong = getWrongQuestions(); var el = $("mistakes-count"); var btn = $("btn-practice-mistakes");
+    var sc = getSelectedChapters(); var scope = sc.length === allChaptersList.length ? "across all chapters" : "in selected chapter" + (sc.length !== 1 ? "s" : "");
+    if (wrong.length === 0) { el.textContent = "No wrong answers " + scope; btn.disabled = true; }
+    else { el.textContent = wrong.length + " question" + (wrong.length !== 1 ? "s" : "") + " answered wrong " + scope; btn.disabled = false; }
+  }
+  function updateUnansweredCount() {
+    var unanswered = getUnansweredQuestions(); var el = $("unanswered-count"); var btn = $("btn-unanswered");
+    var sc = getSelectedChapters(); var scope = sc.length === allChaptersList.length ? "across all chapters" : "in selected chapter" + (sc.length !== 1 ? "s" : "");
+    if (unanswered.length === 0) { el.textContent = "All questions answered " + scope; btn.disabled = true; }
+    else { el.textContent = unanswered.length + " unanswered " + scope; btn.disabled = false; }
+  }
+  function updateHardestCount() {
+    var hardest = getHardestQuestions(); var el = $("hardest-count"); var btn = $("btn-practice-hardest");
+    var sc = getSelectedChapters(); var scope = sc.length === allChaptersList.length ? "across all chapters" : "in selected chapter" + (sc.length !== 1 ? "s" : "");
+    if (hardest.length === 0) { el.textContent = "No answered questions " + scope + " yet"; btn.disabled = true; }
+    else { el.textContent = hardest.length + " hardest (top 25%) " + scope; btn.disabled = false; }
+  }
 
+  function startPracticeMode(questions) {
     quizQuestionMode = document.querySelector("input[name='questionMode']:checked").value;
     quizAnswerMode = document.querySelector("input[name='answerMode']:checked").value;
-
-    // Sort by most wrong first, then shuffle within same wrong count
-    wrong.sort(function(a, b) {
-      var sa = stats[getQuestionKey(a)] || { wrong: 0 };
-      var sb = stats[getQuestionKey(b)] || { wrong: 0 };
-      return sb.wrong - sa.wrong;
-    });
-
-    quizQueue = $("shuffle-toggle").checked ? shuffleArray(wrong) : wrong.slice();
-    quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = []; lastScreen = "config";
+    quizQueue = $("shuffle-toggle").checked ? shuffleArray(questions) : questions.slice();
+    quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = []; singleQuestionMode = false; lastScreen = "config";
     switchScreen("quiz"); showQuestion();
+  }
+  $("btn-practice-mistakes").addEventListener("click", function() {
+    var wrong = getWrongQuestions(); if (wrong.length === 0) { showToast("No wrong answers!"); return; }
+    wrong.sort(function(a, b) { var sa = stats[getQuestionKey(a)] || { wrong: 0 }; var sb = stats[getQuestionKey(b)] || { wrong: 0 }; return sb.wrong - sa.wrong; });
+    startPracticeMode(wrong);
+  });
+  $("btn-unanswered").addEventListener("click", function() {
+    var unanswered = getUnansweredQuestions(); if (unanswered.length === 0) { showToast("No unanswered questions!"); return; }
+    startPracticeMode(unanswered);
+  });
+  $("btn-practice-hardest").addEventListener("click", function() {
+    var hardest = getHardestQuestions(); if (hardest.length === 0) { showToast("No answered questions yet!"); return; }
+    startPracticeMode(hardest);
   });
 
   /* ========== QUIZ LOGIC ========== */
   function showQuestion() {
-    if (quizIndex >= quizQueue.length) { showResults(); return; }
+    if (quizIndex >= quizQueue.length) {
+      if (singleQuestionMode) { singleQuestionMode = false; buildStatsScreen(); switchScreen("stats"); activateCompletionTab(); return; }
+      showResults(); return;
+    }
     var q = quizQueue[quizIndex]; var total = quizQueue.length;
     $("quiz-progress-fill").style.width = ((quizIndex / total) * 100) + "%";
     $("quiz-counter").textContent = (quizIndex + 1) + " / " + total;
@@ -901,9 +1137,10 @@
     var key = getQuestionKey(q); ensureStats(key);
     if (stats[key].seen > 0) meta.push("Seen " + stats[key].seen + "\u00d7");
     if (stats[key].wrong > 0) meta.push("\u2717" + stats[key].wrong);
+    if (stats[key].streak > 0) meta.push("\ud83d\udd25" + stats[key].streak + "\u00d7 streak");
     $("quiz-meta").textContent = meta.join("  \u2022  ");
     $("answer-area").classList.add("hidden"); $("quiz-judge").classList.add("hidden");
-    $("quiz-actions").innerHTML = "<button class=\"btn btn-primary btn-block\" id=\"btn-show-answer\">Reveal Answer</button>";
+    $("quiz-actions").innerHTML = '<button class="btn btn-primary btn-block" id="btn-show-answer">Reveal Answer</button>';
     $("btn-show-answer").addEventListener("click", revealAnswer);
     answerRevealed = false;
   }
@@ -923,24 +1160,30 @@
     if (mode === "combined") {
       var e = getField(q, "english"); var p = getField(q, "pinyin"); var c = getField(q, "character");
       var comb = getField(q, "combined");
-      if (comb) return "<div class=\"answer-label\">ANSWER</div><div class=\"answer-text\">" + escapeHtml(comb) + "</div>";
-      var html = "<div class=\"answer-label\">ANSWER</div><div class=\"answer-combined\">";
-      if (c) html += "<div class=\"answer-text chinese\">" + escapeHtml(c) + "</div>";
-      if (p) html += "<div class=\"answer-text pinyin\">" + escapeHtml(p) + "</div>";
-      if (e) html += "<div class=\"answer-text\">" + escapeHtml(e) + "</div>";
-      return html + "</div>";
+      if (comb) return '<div class="answer-label">ANSWER</div><div class="answer-text">' + escapeHtml(comb) + '</div>';
+      var html = '<div class="answer-label">ANSWER</div><div class="answer-combined">';
+      if (c) html += '<div class="answer-text chinese">' + escapeHtml(c) + '</div>';
+      if (p) html += '<div class="answer-text pinyin">' + escapeHtml(p) + '</div>';
+      if (e) html += '<div class="answer-text">' + escapeHtml(e) + '</div>';
+      return html + '</div>';
     }
     var text = getField(q, mode) || "\u2014";
     var cls = "answer-text"; if (mode === "character") cls += " chinese"; else if (mode === "pinyin") cls += " pinyin";
-    return "<div class=\"answer-label\">ANSWER</div><div class=\"" + cls + "\">" + escapeHtml(text) + "</div>";
+    return '<div class="answer-label">ANSWER</div><div class="' + cls + '">' + escapeHtml(text) + '</div>';
   }
   $("btn-correct").addEventListener("click", function() {
     var q = quizQueue[quizIndex]; var key = getQuestionKey(q); ensureStats(key);
-    stats[key].seen++; stats[key].correct++; sessionCorrect++; quizIndex++; markUnsaved(); showQuestion();
+    stats[key].seen++; stats[key].correct++; stats[key].streak++; sessionCorrect++; recordDailyAnswer(true); quizIndex++;
+    markUnsaved(); autoSaveToStorage();
+    if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
+    showQuestion();
   });
   $("btn-wrong").addEventListener("click", function() {
     var q = quizQueue[quizIndex]; var key = getQuestionKey(q); ensureStats(key);
-    stats[key].seen++; stats[key].wrong++; sessionWrong++; sessionMistakes.push(q); quizIndex++; markUnsaved(); showQuestion();
+    stats[key].seen++; stats[key].wrong++; stats[key].streak = 0; sessionWrong++; sessionMistakes.push(q); recordDailyAnswer(false); quizIndex++;
+    markUnsaved(); autoSaveToStorage();
+    if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
+    showQuestion();
   });
   $("btn-show-answer").addEventListener("click", revealAnswer);
 
@@ -950,13 +1193,13 @@
     var total = sessionCorrect + sessionWrong;
     var pct = total > 0 ? Math.round((sessionCorrect / total) * 100) : 0;
     $("results-summary").innerHTML =
-      "<div class=\"stat-box\"><div class=\"stat-value\">" + total + "</div><div class=\"stat-label\">Total</div></div>" +
-      "<div class=\"stat-box\"><div class=\"stat-value green\">" + sessionCorrect + "</div><div class=\"stat-label\">Correct</div></div>" +
-      "<div class=\"stat-box\"><div class=\"stat-value " + (pct >= 70 ? "gold" : "") + "\">" + pct + "%</div><div class=\"stat-label\">Accuracy</div></div>";
+      '<div class="stat-box"><div class="stat-value">' + total + '</div><div class="stat-label">Total</div></div>' +
+      '<div class="stat-box"><div class="stat-value green">' + sessionCorrect + '</div><div class="stat-label">Correct</div></div>' +
+      '<div class="stat-box"><div class="stat-value ' + (pct >= 70 ? "gold" : "") + '">' + pct + '%</div><div class="stat-label">Accuracy</div></div>';
     $("btn-results-retry").disabled = sessionMistakes.length === 0;
     $("btn-results-retry").textContent = sessionMistakes.length === 0 ? "No Mistakes!" : "Retry " + sessionMistakes.length + " Mistake" + (sessionMistakes.length > 1 ? "s" : "");
   }
-  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); updateQuestionCount(); updateMistakesCount(); });
+  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); });
   $("btn-results-retry").addEventListener("click", function() {
     if (sessionMistakes.length === 0) return;
     quizQueue = shuffleArray(sessionMistakes); quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = [];
@@ -978,19 +1221,15 @@
 
   /* ========== STATS SCREEN ========== */
   function buildStatsScreen() {
-    // Lifetime summary
     var totalSeen = 0; var totalCorrect = 0; var totalWrong = 0;
     var keys = Object.keys(stats);
     for (var i = 0; i < keys.length; i++) { totalSeen += stats[keys[i]].seen; totalCorrect += stats[keys[i]].correct; totalWrong += stats[keys[i]].wrong; }
     var lifetimePct = totalSeen > 0 ? Math.round((totalCorrect / totalSeen) * 100) : 0;
     $("lifetime-summary").innerHTML =
-      "<div class=\"stat-box\"><div class=\"stat-value\">" + totalSeen + "</div><div class=\"stat-label\">Attempts</div></div>" +
-      "<div class=\"stat-box\"><div class=\"stat-value green\">" + totalCorrect + "</div><div class=\"stat-label\">Correct</div></div>" +
-      "<div class=\"stat-box\"><div class=\"stat-value " + (lifetimePct >= 70 ? "gold" : "") + "\">" + lifetimePct + "%</div><div class=\"stat-label\">Accuracy</div></div>";
-
-    buildChapterStats();
-    buildTopWrong();
-    buildAllQuestionsTable();
+      '<div class="stat-box"><div class="stat-value">' + totalSeen + '</div><div class="stat-label">Attempts</div></div>' +
+      '<div class="stat-box"><div class="stat-value green">' + totalCorrect + '</div><div class="stat-label">Correct</div></div>' +
+      '<div class="stat-box"><div class="stat-value ' + (lifetimePct >= 70 ? "gold" : "") + '">' + lifetimePct + '%</div><div class="stat-label">Accuracy</div></div>';
+    buildChapterStats(); buildTopWrong(); buildAllQuestionsTable(); buildCompletionGrid();
   }
 
   /* ========== TAB: BY CHAPTER ========== */
@@ -999,11 +1238,8 @@
     var chapters = getUniqueChapters();
     if (chapters.length === 0) { $("chapter-stats-empty").classList.remove("hidden"); return; }
     $("chapter-stats-empty").classList.add("hidden");
-
     for (var ci = 0; ci < chapters.length; ci++) {
-      var ch = chapters[ci];
-      // Gather per-chapter data
-      var chQuestions = [];
+      var ch = chapters[ci]; var chQuestions = [];
       var chSeen = 0; var chCorrect = 0; var chWrong = 0; var chTotal = 0;
       for (var qi = 0; qi < allQuestions.length; qi++) {
         if (getField(allQuestions[qi], "chapter") !== ch) continue;
@@ -1014,135 +1250,76 @@
         chQuestions.push({ q: allQuestions[qi], s: s, key: key });
       }
       var chPct = chSeen > 0 ? Math.round((chCorrect / chSeen) * 100) : 0;
-
-      // Sort: wrong first, then unanswered, then correct
-      chQuestions.sort(function(a, b) {
-        if (b.s.wrong !== a.s.wrong) return b.s.wrong - a.s.wrong;
-        return a.s.seen - b.s.seen;
-      });
-
-      var card = document.createElement("div"); card.className = "chapter-stat-card";
-      card.dataset.chapter = ch;
-
-      var headerHTML = "<div class=\"chapter-stat-header\">" +
-        "<h4>Chapter " + escapeHtml(ch) + "</h4>" +
-        "<span class=\"ch-badge\">" + chTotal + " words</span></div>";
-
-      var statsRow = "<div class=\"chapter-stat-row\">" +
-        "<span class=\"chapter-stat-item\">Attempts: <strong>" + chSeen + "</strong></span>" +
-        "<span class=\"chapter-stat-item correct-count\">\u2713 <strong>" + chCorrect + "</strong></span>" +
-        "<span class=\"chapter-stat-item wrong-count\">\u2717 <strong>" + chWrong + "</strong></span>" +
-        "<span class=\"chapter-stat-item\">" + chPct + "%</span>" +
-        "<div class=\"chapter-bar\"><div class=\"bar-fill-correct\" style=\"width:" + chPct + "%\"></div></div></div>";
-
-      // Build expandable question list
-      var detailHTML = "<div class=\"chapter-detail-questions\" id=\"ch-detail-" + ci + "\">";
+      chQuestions.sort(function(a, b) { if (b.s.wrong !== a.s.wrong) return b.s.wrong - a.s.wrong; return a.s.seen - b.s.seen; });
+      var card = document.createElement("div"); card.className = "chapter-stat-card"; card.dataset.chapter = ch;
+      var headerHTML = '<div class="chapter-stat-header"><h4>Chapter ' + escapeHtml(ch) + '</h4><span class="ch-badge">' + chTotal + ' words</span></div>';
+      var statsRow = '<div class="chapter-stat-row">' +
+        '<span class="chapter-stat-item">Attempts: <strong>' + chSeen + '</strong></span>' +
+        '<span class="chapter-stat-item correct-count">\u2713 <strong>' + chCorrect + '</strong></span>' +
+        '<span class="chapter-stat-item wrong-count">\u2717 <strong>' + chWrong + '</strong></span>' +
+        '<span class="chapter-stat-item">' + chPct + '%</span>' +
+        '<div class="chapter-bar"><div class="bar-fill-correct" style="width:' + chPct + '%"></div></div></div>';
+      var detailHTML = '<div class="chapter-detail-questions" id="ch-detail-' + ci + '">';
       for (var di = 0; di < chQuestions.length; di++) {
         var dq = chQuestions[di];
         var eng = getField(dq.q, "english"); var cha = getField(dq.q, "character"); var pin = getField(dq.q, "pinyin");
         var qInCh = getField(dq.q, "qInChapter"); var overallQ = getField(dq.q, "overallQ");
-
-        var numStr = "";
-        if (qInCh) numStr += "Q" + escapeHtml(qInCh);
+        var numStr = ""; if (qInCh) numStr += "Q" + escapeHtml(qInCh);
         if (overallQ) numStr += (numStr ? "<br>" : "") + "#" + escapeHtml(overallQ);
         if (!numStr) numStr = "#" + (di + 1);
-
         var wordStr = "";
-        if (cha) wordStr += "<span class=\"chinese-cell\">" + escapeHtml(cha) + "</span> ";
-        if (pin) wordStr += "<span class=\"pinyin-cell\">" + escapeHtml(pin) + "</span> ";
-        if (eng) wordStr += escapeHtml(eng);
-        if (!wordStr) wordStr = "\u2014";
-
-        var statCls = "ch-q-stat";
-        var statStr = "";
-        if (dq.s.seen === 0) { statStr = "not tried"; }
+        if (cha) wordStr += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
+        if (pin) wordStr += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> ';
+        if (eng) wordStr += escapeHtml(eng); if (!wordStr) wordStr = "\u2014";
+        var statCls = "ch-q-stat"; var statStr = "";
+        if (dq.s.seen === 0) statStr = "not tried";
         else if (dq.s.wrong > 0) { statCls += " has-wrong"; statStr = "\u2717" + dq.s.wrong + " / " + dq.s.seen + " tries"; }
         else { statCls += " all-correct"; statStr = "\u2713 " + dq.s.correct + "/" + dq.s.seen; }
-
-        detailHTML += "<div class=\"ch-q-row\"><div class=\"ch-q-nums\">" + numStr + "</div><div class=\"ch-q-word\">" + wordStr + "</div><div class=\"" + statCls + "\">" + statStr + "</div></div>";
+        detailHTML += '<div class="ch-q-row"><div class="ch-q-nums">' + numStr + '</div><div class="ch-q-word">' + wordStr + '</div><div class="' + statCls + '">' + statStr + '</div></div>';
       }
-      detailHTML += "</div>";
-
+      detailHTML += '</div>';
       card.innerHTML = headerHTML + statsRow + detailHTML;
       grid.appendChild(card);
-
-      // Toggle expand on click
-      (function(idx) {
-        card.addEventListener("click", function() {
-          var detail = $("ch-detail-" + idx);
-          detail.classList.toggle("open");
-        });
-      })(ci);
+      (function(idx) { card.addEventListener("click", function() { $("ch-detail-" + idx).classList.toggle("open"); }); })(ci);
     }
   }
 
   /* ========== TAB: TOP 30 WRONG ========== */
   function buildTopWrong() {
     var list = $("top-wrong-list"); list.innerHTML = "";
-    // Collect all questions with wrong > 0
     var wrongItems = [];
     for (var i = 0; i < allQuestions.length; i++) {
-      var key = getQuestionKey(allQuestions[i]);
-      var s = stats[key];
-      if (s && s.wrong > 0) {
-        wrongItems.push({ q: allQuestions[i], s: s, key: key });
-      }
+      var key = getQuestionKey(allQuestions[i]); var s = stats[key];
+      if (s && s.wrong > 0) wrongItems.push({ q: allQuestions[i], s: s, key: key });
     }
     if (wrongItems.length === 0) { $("top-wrong-empty").classList.remove("hidden"); return; }
     $("top-wrong-empty").classList.add("hidden");
-
-    // Sort by wrong count desc, then accuracy asc
-    wrongItems.sort(function(a, b) {
-      if (b.s.wrong !== a.s.wrong) return b.s.wrong - a.s.wrong;
-      var accA = a.s.seen > 0 ? a.s.correct / a.s.seen : 0;
-      var accB = b.s.seen > 0 ? b.s.correct / b.s.seen : 0;
-      return accA - accB;
-    });
-
+    wrongItems.sort(function(a, b) { if (b.s.wrong !== a.s.wrong) return b.s.wrong - a.s.wrong; var accA = a.s.seen > 0 ? a.s.correct / a.s.seen : 0; var accB = b.s.seen > 0 ? b.s.correct / b.s.seen : 0; return accA - accB; });
     var max = Math.min(wrongItems.length, 30);
     for (var wi = 0; wi < max; wi++) {
       var item = wrongItems[wi];
       var eng = getField(item.q, "english"); var cha = getField(item.q, "character"); var pin = getField(item.q, "pinyin");
-      var ch = getField(item.q, "chapter");
+      var ch = getField(item.q, "chapter"); var qInCh = getField(item.q, "qInChapter"); var overallQ = getField(item.q, "overallQ");
       var pct = item.s.seen > 0 ? Math.round((item.s.correct / item.s.seen) * 100) : 0;
-
-      var mainWord = "";
-      if (cha) mainWord = "<span class=\"chinese-cell\">" + escapeHtml(cha) + "</span>";
-      else if (eng) mainWord = escapeHtml(eng);
-      else mainWord = "\u2014";
-
-      var subLine = "";
-      if (pin) subLine += "<span class=\"pinyin-cell\">" + escapeHtml(pin) + "</span> ";
-      if (cha && eng) subLine += escapeHtml(eng) + " ";
-      if (ch) subLine += "Ch." + escapeHtml(ch);
-
+      var mainWord = cha ? '<span class="chinese-cell">' + escapeHtml(cha) + '</span>' : (eng ? escapeHtml(eng) : "\u2014");
+      var subLine = ""; if (pin) subLine += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> '; if (cha && eng) subLine += escapeHtml(eng);
+      var numsLine = ""; if (ch) numsLine += "Ch." + escapeHtml(ch); if (qInCh) numsLine += (numsLine ? " " : "") + "Q" + escapeHtml(qInCh); if (overallQ) numsLine += "<br>#" + escapeHtml(overallQ);
       var row = document.createElement("div"); row.className = "wrong-list-item";
-      row.innerHTML =
-        "<div class=\"wrong-rank " + (wi < 3 ? "top3" : "") + "\">" + (wi + 1) + "</div>" +
-        "<div class=\"wrong-word-info\">" +
-          "<div class=\"wrong-word-main\">" + mainWord + "</div>" +
-          "<div class=\"wrong-word-sub\">" + subLine + "</div>" +
-        "</div>" +
-        "<div class=\"wrong-stats\">" +
-          "<div class=\"wrong-count-big\">" + item.s.wrong + "\u2717</div>" +
-          "<div class=\"wrong-detail\">" + pct + "% of " + item.s.seen + "</div>" +
-        "</div>";
+      row.innerHTML = '<div class="wrong-rank ' + (wi < 3 ? "top3" : "") + '">' + (wi + 1) + '</div>' +
+        '<div class="wrong-nums">' + numsLine + '</div>' +
+        '<div class="wrong-word-info"><div class="wrong-word-main">' + mainWord + '</div><div class="wrong-word-sub">' + subLine + '</div></div>' +
+        '<div class="wrong-stats"><div class="wrong-count-big">' + item.s.wrong + '\u2717</div><div class="wrong-detail">' + pct + '% of ' + item.s.seen + '</div></div>';
       list.appendChild(row);
     }
   }
 
   /* ========== TAB: ALL QUESTIONS ========== */
   function buildAllQuestionsTable() {
-    var chapterSelect = $("stats-filter-chapter");
-    var chapters = getUniqueChapters();
-    chapterSelect.innerHTML = "<option value=\"all\">All Chapters</option>";
-    for (var ci = 0; ci < chapters.length; ci++) {
-      var opt = document.createElement("option"); opt.value = chapters[ci]; opt.textContent = "Chapter " + chapters[ci];
-      chapterSelect.appendChild(opt);
-    }
+    var chapterSelect = $("stats-filter-chapter"); var chapters = getUniqueChapters();
+    chapterSelect.innerHTML = '<option value="all">All Chapters</option>';
+    for (var ci = 0; ci < chapters.length; ci++) { var opt = document.createElement("option"); opt.value = chapters[ci]; opt.textContent = "Chapter " + chapters[ci]; chapterSelect.appendChild(opt); }
     renderStatsTable();
   }
-
   function renderStatsTable() {
     var tbody = $("stats-tbody"); tbody.innerHTML = "";
     var chF = $("stats-filter-chapter").value; var stF = $("stats-filter-status").value;
@@ -1163,49 +1340,106 @@
       if (statsSortField === "accuracy") { var accA = a.s.seen > 0 ? a.s.correct / a.s.seen : -1; var accB = b.s.seen > 0 ? b.s.correct / b.s.seen : -1; return statsSortAsc ? (accA - accB) : (accB - accA); }
       return 0;
     });
-    if (rows.length === 0) {
-      $("stats-empty").classList.remove("hidden");
-      tbody.parentNode.parentNode.classList.add("hidden"); return;
-    }
-    $("stats-empty").classList.add("hidden");
-    tbody.parentNode.parentNode.classList.remove("hidden");
-
+    if (rows.length === 0) { $("stats-empty").classList.remove("hidden"); tbody.parentNode.parentNode.classList.add("hidden"); return; }
+    $("stats-empty").classList.add("hidden"); tbody.parentNode.parentNode.classList.remove("hidden");
     for (var ri = 0; ri < rows.length; ri++) {
       var row = rows[ri]; var tr = document.createElement("tr");
-
       var tdCh = document.createElement("td"); tdCh.textContent = row.ch || "\u2014"; tr.appendChild(tdCh);
-
       var tdWord = document.createElement("td");
       var eng = getField(row.q, "english"); var cha = getField(row.q, "character"); var pin = getField(row.q, "pinyin");
       var wh = "";
-      if (cha) wh += "<span class=\"chinese-cell\">" + escapeHtml(cha) + "</span> ";
-      if (pin) wh += "<span class=\"pinyin-cell\">" + escapeHtml(pin) + "</span><br>";
+      if (cha) wh += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
+      if (pin) wh += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span><br>';
       if (eng) wh += escapeHtml(eng);
       tdWord.innerHTML = wh || "\u2014"; tr.appendChild(tdWord);
-
       var tdWrong = document.createElement("td");
       tdWrong.style.fontFamily = "'JetBrains Mono', monospace"; tdWrong.style.fontSize = "0.85rem";
       tdWrong.textContent = row.s.wrong;
-      if (row.s.wrong > 0) { tdWrong.style.color = "var(--vermillion)"; tdWrong.style.fontWeight = "700"; }
+      if (row.s.wrong > 0) { tdWrong.style.color = "var(--wrong-red)"; tdWrong.style.fontWeight = "700"; }
       tr.appendChild(tdWrong);
-
-      var tdTries = document.createElement("td");
-      tdTries.textContent = row.s.seen; tdTries.style.fontFamily = "'JetBrains Mono', monospace"; tdTries.style.fontSize = "0.85rem";
-      tr.appendChild(tdTries);
-
+      var tdTries = document.createElement("td"); tdTries.textContent = row.s.seen; tdTries.style.fontFamily = "'JetBrains Mono', monospace"; tdTries.style.fontSize = "0.85rem"; tr.appendChild(tdTries);
       var tdAcc = document.createElement("td");
       if (row.s.seen > 0) {
         var pct = Math.round((row.s.correct / row.s.seen) * 100);
-        tdAcc.innerHTML = "<div style=\"font-family:'JetBrains Mono',monospace;font-size:0.8rem;margin-bottom:3px;\">" + pct + "% <span style=\"color:var(--text-muted);font-size:0.72rem;\">(" + row.s.correct + "/" + row.s.seen + ")</span></div>" +
-          "<div class=\"stats-bar\"><div class=\"bar-correct\" style=\"width:" + pct + "%\"></div><div class=\"bar-wrong\" style=\"width:" + (100 - pct) + "%\"></div></div>";
-      } else { tdAcc.innerHTML = "<span style=\"color:var(--text-muted);font-size:0.82rem;\">\u2014</span>"; }
-      tr.appendChild(tdAcc);
-      tbody.appendChild(tr);
+        tdAcc.innerHTML = '<div style="font-family:\'JetBrains Mono\',monospace;font-size:0.8rem;margin-bottom:3px;">' + pct + '% <span style="color:var(--text-muted);font-size:0.72rem;">(' + row.s.correct + '/' + row.s.seen + ')</span></div>' +
+          '<div class="stats-bar"><div class="bar-correct" style="width:' + pct + '%"></div><div class="bar-wrong" style="width:' + (100 - pct) + '%"></div></div>';
+      } else { tdAcc.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">\u2014</span>'; }
+      tr.appendChild(tdAcc); tbody.appendChild(tr);
     }
   }
-
   $("stats-filter-chapter").addEventListener("change", renderStatsTable);
   $("stats-filter-status").addEventListener("change", renderStatsTable);
+
+  /* ========== TAB: COMPLETION OVERVIEW ========== */
+  function buildCompletionGrid() {
+    var wrapper = $("completion-wrapper"); if (!wrapper) return; wrapper.innerHTML = "";
+    var summaryEl = $("cg-summary"); var chapters = getUniqueChapters();
+    if (chapters.length === 0) { wrapper.innerHTML = '<div class="empty-state"><div class="empty-icon">\ud83d\udced</div><p>No data yet.</p></div>'; summaryEl.textContent = ""; return; }
+    var isDark = document.documentElement.classList.contains("dark");
+    var chGroups = {};
+    for (var i = 0; i < allQuestions.length; i++) {
+      var q = allQuestions[i]; var ch = getField(q, "chapter"); if (!ch) continue;
+      if (!chGroups[ch]) chGroups[ch] = [];
+      chGroups[ch].push({ q: q, s: stats[getQuestionKey(q)] || null });
+    }
+    var maxCols = 0;
+    for (var ci = 0; ci < chapters.length; ci++) { var len = (chGroups[chapters[ci]] || []).length; if (len > maxCols) maxCols = len; }
+    if (maxCols > 50) maxCols = 50;
+    if (maxCols <= 0) { wrapper.innerHTML = '<div class="empty-state"><p>No data.</p></div>'; summaryEl.textContent = ""; return; }
+    var totalQ = 0, answeredQ = 0, correctQ = 0, wrongQ = 0;
+    var grid = document.createElement("div"); grid.className = "cg-grid";
+    var hdrRow = document.createElement("div"); hdrRow.className = "cg-row";
+    var hdrLabel = document.createElement("div"); hdrLabel.className = "cg-label"; hdrRow.appendChild(hdrLabel);
+    var hdrCells = document.createElement("div"); hdrCells.className = "cg-cells cg-hdr";
+    for (var hi = 1; hi <= maxCols; hi++) { var hdrNum = document.createElement("div"); hdrNum.className = "cg-hdr-num"; if (hi === 1 || hi % 5 === 0) hdrNum.textContent = hi; hdrCells.appendChild(hdrNum); }
+    hdrRow.appendChild(hdrCells); grid.appendChild(hdrRow);
+    for (var ri = 0; ri < chapters.length; ri++) {
+      var chName = chapters[ri]; var items = chGroups[chName] || [];
+      var row = document.createElement("div"); row.className = "cg-row";
+      var label = document.createElement("div"); label.className = "cg-label"; label.textContent = chName; row.appendChild(label);
+      var cells = document.createElement("div"); cells.className = "cg-cells";
+      for (var col = 0; col < maxCols; col++) {
+        var cell = document.createElement("div"); cell.className = "cg-cell";
+        if (col >= items.length) { cell.style.backgroundColor = isDark ? "#1a1a30" : "#f0ece4"; }
+        else {
+          totalQ++; var item = items[col]; var st = item.s;
+          var tip = "Ch." + chName + " Q" + (col + 1);
+          var cha2 = getField(item.q, "character"); var eng2 = getField(item.q, "english");
+          if (cha2) tip += " | " + cha2; if (eng2) tip += " | " + eng2;
+          if (st && st.seen > 0) {
+            answeredQ++;
+            if (st.streak === 0) { cell.style.backgroundColor = isDark ? "#e05550" : "#c23631"; wrongQ++; }
+            else { cell.style.backgroundColor = isDark ? "#3da873" : "#2d8659"; correctQ++; }
+          } else {
+            cell.style.backgroundColor = isDark ? "#2a2a44" : "#ffffff";
+            cell.style.border = "1px solid " + (isDark ? "#555577" : "#aaaaaa");
+          }
+          cell.title = tip;
+          (function(questionObj) { cell.addEventListener("click", function() { startSingleQuestion(questionObj); }); })(item.q);
+        }
+        cells.appendChild(cell);
+      }
+      row.appendChild(cells); grid.appendChild(row);
+    }
+    wrapper.appendChild(grid);
+    var notTried = totalQ - answeredQ;
+    summaryEl.textContent = answeredQ + "/" + totalQ + " attempted (" + (totalQ > 0 ? Math.round((answeredQ / totalQ) * 100) : 0) + "%) \u2022 " + correctQ + " correct \u2022 " + wrongQ + " wrong \u2022 " + notTried + " remaining";
+  }
+  function activateCompletionTab() {
+    var sTabs = document.querySelectorAll(".stats-tab");
+    for (var j = 0; j < sTabs.length; j++) sTabs[j].classList.remove("active");
+    var sContents = document.querySelectorAll(".stats-tab-content");
+    for (var k = 0; k < sContents.length; k++) sContents[k].classList.remove("active");
+    var ct = document.querySelector(".stats-tab[data-tab='tab-completion']");
+    if (ct) ct.classList.add("active");
+    $("tab-completion").classList.add("active");
+  }
+  function startSingleQuestion(q) {
+    quizQuestionMode = document.querySelector("input[name='questionMode']:checked").value;
+    quizAnswerMode = document.querySelector("input[name='answerMode']:checked").value;
+    quizQueue = [q]; quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = [];
+    singleQuestionMode = true; lastScreen = "stats"; switchScreen("quiz"); showQuestion();
+  }
 
   var sortBtns = document.querySelectorAll(".sort-btn");
   for (var si = 0; si < sortBtns.length; si++) {
@@ -1219,28 +1453,24 @@
 
   /* ========== RESET STATS ========== */
   $("btn-reset-stats").addEventListener("click", function() {
-    showConfirmDialog(
-      "This will permanently erase ALL your answer statistics for every question. Your vocabulary words will remain. Are you sure?",
-      function() {
-        stats = {};
-        markUnsaved();
-        buildStatsScreen();
-        showToast("All statistics have been reset to zero.");
-      }
-    );
+    showConfirmDialog("This will permanently erase ALL your answer statistics. Your vocabulary words will remain. Are you sure?", function() {
+      stats = {}; markUnsaved(); autoSaveToStorage(); buildStatsScreen(); showToast("All statistics have been reset.");
+      if (window._chineseApp && window._chineseApp.onDataChanged) window._chineseApp.onDataChanged();
+    });
   });
 
-  /* ========== EXPORT STATS ========== */
+  /* ========== EXPORT / IMPORT STATS ========== */
   $("btn-export-stats").addEventListener("click", function() {
-    var csvRows = ["Chapter,English,Pinyin,Character,Times Seen,Correct,Wrong,Accuracy %"];
+    var csvRows = ["Chapter,English,Pinyin,Character,Times Seen,Correct,Wrong,Streak,Accuracy %"];
     for (var i = 0; i < allQuestions.length; i++) {
       var q = allQuestions[i]; var key = getQuestionKey(q);
-      var s = stats[key] || { seen: 0, correct: 0, wrong: 0 };
+      var s = stats[key] || { seen: 0, correct: 0, wrong: 0, streak: 0 };
       if (s.seen === 0) continue;
       var pct = Math.round((s.correct / s.seen) * 100);
+      var exportStreak = (s.streak !== undefined && s.streak !== null) ? s.streak : (s.wrong === 0 && s.correct > 0 ? s.correct : 0);
       csvRows.push(csvEscape(getField(q, "chapter")) + "," + csvEscape(getField(q, "english")) + "," +
         csvEscape(getField(q, "pinyin")) + "," + csvEscape(getField(q, "character")) + "," +
-        s.seen + "," + s.correct + "," + s.wrong + "," + pct);
+        s.seen + "," + s.correct + "," + s.wrong + "," + exportStreak + "," + pct);
     }
     var blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
     var url = URL.createObjectURL(blob);
@@ -1250,9 +1480,65 @@
   });
   function csvEscape(val) {
     var str = String(val);
-    if (str.indexOf(",") !== -1 || str.indexOf("\"") !== -1 || str.indexOf("\n") !== -1) return "\"" + str.replace(/"/g, "\"\"") + "\"";
+    if (str.indexOf(",") !== -1 || str.indexOf('"') !== -1 || str.indexOf("\n") !== -1) return '"' + str.replace(/"/g, '""') + '"';
     return str;
   }
+  function csvParseLine(line) {
+    var result = []; var cur = ""; var inQuotes = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (inQuotes) { if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') { cur += '"'; i++; } else if (ch === '"') inQuotes = false; else cur += ch; }
+      else { if (ch === '"') inQuotes = true; else if (ch === ',') { result.push(cur); cur = ""; } else cur += ch; }
+    }
+    result.push(cur); return result;
+  }
+  $("btn-import-stats").addEventListener("click", function() { $("import-stats-input").value = ""; $("import-stats-input").click(); });
+  $("import-stats-input").addEventListener("change", function() {
+    var fi = this; var statusEl = $("import-stats-status");
+    if (!fi.files || fi.files.length === 0) return;
+    statusEl.textContent = "Reading " + fi.files[0].name + "...";
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var text = e.target.result;
+      var lines = text.split(/\r?\n/).filter(function(l) { return l.trim() !== ""; });
+      if (lines.length < 2) { statusEl.textContent = "CSV is empty or has no data rows"; return; }
+      var hdr = csvParseLine(lines[0]); var hdrMap = {};
+      for (var h = 0; h < hdr.length; h++) hdrMap[hdr[h].trim()] = h;
+      var iCh = hdrMap["Chapter"]; var iEn = hdrMap["English"]; var iPy = hdrMap["Pinyin"]; var iCr = hdrMap["Character"];
+      var iSeen = hdrMap["Times Seen"]; var iCorr = hdrMap["Correct"]; var iWrong = hdrMap["Wrong"]; var iStreak = hdrMap["Streak"];
+      if (iCh === undefined || iSeen === undefined || iCorr === undefined || iWrong === undefined) {
+        statusEl.textContent = "CSV missing required columns"; return;
+      }
+      var csvRows = [];
+      for (var r = 1; r < lines.length; r++) {
+        var cols = csvParseLine(lines[r]);
+        var rowSeen = parseInt(cols[iSeen]) || 0; var rowCorrect = parseInt(cols[iCorr]) || 0; var rowWrong = parseInt(cols[iWrong]) || 0;
+        var rowStreak;
+        if (iStreak !== undefined && cols[iStreak] !== undefined && cols[iStreak].trim() !== "") { rowStreak = parseInt(cols[iStreak]); if (isNaN(rowStreak)) rowStreak = 0; }
+        else { rowStreak = (rowWrong === 0 && rowCorrect > 0) ? rowCorrect : 0; }
+        if (rowStreak === 0 && rowWrong === 0 && rowCorrect > 0) rowStreak = rowCorrect;
+        csvRows.push({ chapter: (cols[iCh] || "").trim(), english: iEn !== undefined ? (cols[iEn] || "").trim() : "", pinyin: iPy !== undefined ? (cols[iPy] || "").trim() : "", character: iCr !== undefined ? (cols[iCr] || "").trim() : "", seen: rowSeen, correct: rowCorrect, wrong: rowWrong, streak: rowStreak });
+      }
+      var matched = 0; var skipped = 0;
+      for (var ci = 0; ci < csvRows.length; ci++) {
+        var cr = csvRows[ci]; if (cr.seen === 0) continue;
+        var bestMatch = -1;
+        for (var qi = 0; qi < allQuestions.length; qi++) {
+          var q = allQuestions[qi]; var qCh = getField(q, "chapter"); var qCr = getField(q, "character"); var qEn = getField(q, "english");
+          if (qCh !== cr.chapter) continue;
+          if (cr.character && qCr === cr.character) { bestMatch = qi; break; }
+          if (cr.english && qEn.toLowerCase() === cr.english.toLowerCase()) { bestMatch = qi; break; }
+        }
+        if (bestMatch >= 0) { var key = getQuestionKey(allQuestions[bestMatch]); stats[key] = { seen: cr.seen, correct: cr.correct, wrong: cr.wrong, streak: cr.streak }; matched++; }
+        else skipped++;
+      }
+      markUnsaved(); autoSaveToStorage(); buildStatsScreen();
+      if (window._chineseApp && window._chineseApp.onDataChanged) window._chineseApp.onDataChanged();
+      statusEl.textContent = "\u2713 Imported: " + matched + " restored" + (skipped > 0 ? " (" + skipped + " unmatched)" : "");
+      showToast("Stats imported! " + matched + " questions restored.");
+    };
+    reader.readAsText(fi.files[0]);
+  });
 
   /* ========== NAVIGATION ========== */
   $("btn-back-upload").addEventListener("click", function() {
@@ -1265,26 +1551,25 @@
     }
   });
   $("btn-quit-quiz").addEventListener("click", function() {
-    if (quizIndex > 0) showConfirmDialog("Leave the quiz? Progress will be shown in results.", function() { showResults(); });
-    else switchScreen("config");
+    if (singleQuestionMode) { singleQuestionMode = false; buildStatsScreen(); switchScreen("stats"); activateCompletionTab(); return; }
+    switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay();
   });
-  $("btn-stats-back").addEventListener("click", function() { switchScreen(lastScreen); if (lastScreen === "config") { updateQuestionCount(); updateMistakesCount(); } });
-
-  // Stats link on config screen
-  var configCard = document.querySelector("#screen-config .card");
-  var statsLink = document.createElement("div"); statsLink.style.textAlign = "center"; statsLink.style.marginTop = "10px";
-  statsLink.innerHTML = "<button class=\"select-all-btn\" id=\"btn-config-stats\">View Statistics \u2192</button>";
-  configCard.appendChild(statsLink);
-  document.addEventListener("click", function(e) {
-    if (e.target && e.target.id === "btn-config-stats") { lastScreen = "config"; buildStatsScreen(); switchScreen("stats"); }
+  $("btn-stats-back").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); });
+  $("btn-config-stats").addEventListener("click", function() { lastScreen = "config"; buildStatsScreen(); switchScreen("stats"); });
+  $("btn-config-reset").addEventListener("click", function() {
+    showConfirmDialog("This will permanently erase ALL your answer statistics. Your vocabulary words will remain. Are you sure?", function() {
+      stats = {}; markUnsaved(); autoSaveToStorage(); syncChipStyles(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount();
+      if (window._chineseApp && window._chineseApp.onDataChanged) window._chineseApp.onDataChanged();
+      showToast("All statistics have been reset.");
+    });
   });
 
   /* ========== CONFIRM DIALOG ========== */
   function showConfirmDialog(message, onConfirm) {
     var overlay = document.createElement("div"); overlay.className = "modal-overlay";
-    overlay.innerHTML = "<div class=\"modal-box\"><h3>Confirm</h3><p>" + escapeHtml(message) + "</p>" +
-      "<div class=\"modal-actions\"><button class=\"btn btn-secondary modal-cancel\">Cancel</button>" +
-      "<button class=\"btn btn-primary modal-confirm\">Confirm</button></div></div>";
+    overlay.innerHTML = '<div class="modal-box"><h3>Confirm</h3><p>' + escapeHtml(message) + '</p>' +
+      '<div class="modal-actions"><button class="btn btn-secondary modal-cancel">Cancel</button>' +
+      '<button class="btn btn-primary modal-confirm">Confirm</button></div></div>';
     document.body.appendChild(overlay);
     overlay.querySelector(".modal-cancel").addEventListener("click", function() { overlay.remove(); });
     overlay.querySelector(".modal-confirm").addEventListener("click", function() { overlay.remove(); onConfirm(); });
@@ -1294,44 +1579,201 @@
   /* ========== KEYBOARD SHORTCUTS ========== */
   document.addEventListener("keydown", function(e) {
     if (!$("screen-quiz").classList.contains("active")) return;
+    if (document.querySelector(".modal-overlay")) return;
+    var tag = document.activeElement ? document.activeElement.tagName : "";
+    if (tag === "BUTTON" || tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
     if ((e.key === " " || e.key === "Enter") && !answerRevealed) { e.preventDefault(); revealAnswer(); }
     else if ((e.key === "ArrowRight" || e.key === "1") && answerRevealed) { e.preventDefault(); $("btn-correct").click(); }
     else if ((e.key === "ArrowLeft" || e.key === "2") && answerRevealed) { e.preventDefault(); $("btn-wrong").click(); }
   });
 
+  /* ========== CLOUD SYNC API ========== */
+  window._chineseApp = {
+    getState: function() {
+      return {
+        questions: allQuestions.map(function(q) {
+          var copy = {}; var keys = Object.keys(q);
+          for (var i = 0; i < keys.length; i++) { if (keys[i] !== "_index") copy[keys[i]] = q[keys[i]]; }
+          return copy;
+        }),
+        columnMap: columnMap,
+        stats: stats,
+        availableColumns: availableColumns,
+        dailyLog: dailyLog,
+        dailyGoal: dailyGoal
+      };
+    },
+    getStats: function() { return stats; },
+    getDailyData: function() { return { dailyLog: dailyLog, dailyGoal: dailyGoal }; },
+    hasData: function() { return allQuestions.length > 0; },
+    loadCloudData: function(data, shouldSwitch) {
+      if (!data || !data.questions || data.questions.length === 0) return false;
+      allQuestions = data.questions.map(function(row, idx) { row._index = idx; return row; });
+      if (data.columnMap) columnMap = data.columnMap;
+      if (data.stats) stats = data.stats;
+      if (data.availableColumns) availableColumns = data.availableColumns;
+      if (data.dailyLog) dailyLog = data.dailyLog;
+      if (data.dailyGoal) dailyGoal = data.dailyGoal;
+      var chapters = getUniqueChapters();
+      $("saved-banner").classList.remove("hidden");
+      $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 \u2601 Cloud synced";
+      $("upload-card-title").textContent = "Upload New / Updated Words";
+      buildConfigScreen();
+      if (shouldSwitch) switchScreen("config");
+      markSaved();
+      return true;
+    },
+    showToast: showToast,
+    onStatsChanged: null,
+    onDataChanged: null
+  };
+
 })();
 </script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+try {
+  const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+  const { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js");
+  const { getFirestore, doc, setDoc, getDoc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
 
-const firebaseConfig = {
-  apiKey: "AIzaSyAOMlfo-b3tZoXPlH-wYJKJKevY-oAMRY4",
-  authDomain: "chinese-595bb.firebaseapp.com",
-  projectId: "chinese-595bb",
-  appId: "1:639352686956:web:c091c0693ee9f7a75f0b49"
-};
+  const firebaseConfig = {
+    apiKey: "AIzaSyAOMlfo-b3tZoXPlH-wYJKJKevY-oAMRY4",
+    authDomain: "chinese-595bb.firebaseapp.com",
+    projectId: "chinese-595bb",
+    appId: "1:639352686956:web:c091c0693ee9f7a75f0b49"
+  };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  let currentUser = null;
+  let saveTimeout = null;
 
-window.login = async function () {
-  const provider = new GoogleAuthProvider();
-  await signInWithPopup(auth, provider);
-};
-
-window.logout = async function () {
-  await signOut(auth);
-};
-
-onAuthStateChanged(auth, (user) => {
-  const status = document.getElementById("userStatus");
-  if (user) {
-    status.innerText = "Logged in as: " + user.email;
-  } else {
-    status.innerText = "Not logged in";
+  function updateSyncStatus(state, msg) {
+    var el = document.getElementById("syncStatus");
+    var syncBtn = document.getElementById("btn-cloud-sync");
+    if (!el) return;
+    if (state === "synced") { el.innerHTML = '<span class="sync-dot synced"></span> Synced'; el.classList.remove("hidden"); }
+    else if (state === "syncing") { el.innerHTML = '<span class="sync-dot syncing"></span> Syncing\u2026'; el.classList.remove("hidden"); }
+    else if (state === "error") { el.innerHTML = '<span class="sync-dot error"></span> ' + (msg || "Sync error"); el.classList.remove("hidden"); }
+    else if (state === "loading") { el.innerHTML = '<span class="sync-dot syncing"></span> Loading\u2026'; el.classList.remove("hidden"); }
+    else { el.classList.add("hidden"); }
+    if (syncBtn) syncBtn.classList.toggle("hidden", !currentUser);
   }
-});
+
+  async function saveFullToCloud() {
+    if (!currentUser || !window._chineseApp || !window._chineseApp.hasData()) return;
+    updateSyncStatus("syncing");
+    try {
+      var state = window._chineseApp.getState();
+      var daily = window._chineseApp.getDailyData();
+      await setDoc(doc(db, "users", currentUser.uid), {
+        questions: state.questions, columnMap: state.columnMap, stats: state.stats,
+        availableColumns: state.availableColumns, dailyLog: daily.dailyLog, dailyGoal: daily.dailyGoal,
+        savedAt: new Date().toISOString(), email: currentUser.email
+      });
+      updateSyncStatus("synced");
+    } catch (e) {
+      console.log("Cloud save error: " + e.message);
+      updateSyncStatus("error", "Save failed");
+    }
+  }
+
+  async function saveStatsToCloud() {
+    if (!currentUser || !window._chineseApp || !window._chineseApp.hasData()) return;
+    updateSyncStatus("syncing");
+    try {
+      var stats = window._chineseApp.getStats();
+      var daily = window._chineseApp.getDailyData();
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        stats: stats, dailyLog: daily.dailyLog, savedAt: new Date().toISOString()
+      });
+      updateSyncStatus("synced");
+    } catch (e) {
+      console.log("Stats update failed, trying full save: " + e.message);
+      await saveFullToCloud();
+    }
+  }
+
+  function debouncedStatsSave() {
+    if (!currentUser) return;
+    clearTimeout(saveTimeout);
+    updateSyncStatus("syncing");
+    saveTimeout = setTimeout(saveStatsToCloud, 2000);
+  }
+
+  async function loadFromCloud() {
+    if (!currentUser) return false;
+    updateSyncStatus("loading");
+    try {
+      var snap = await getDoc(doc(db, "users", currentUser.uid));
+      if (snap.exists()) {
+        var data = snap.data();
+        if (data.questions && data.questions.length > 0) {
+          var quizActive = document.getElementById("screen-quiz").classList.contains("active");
+          if (window._chineseApp.loadCloudData(data, !quizActive)) {
+            updateSyncStatus("synced");
+            if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Data loaded from cloud");
+            return true;
+          }
+        }
+      }
+      if (window._chineseApp && window._chineseApp.hasData()) {
+        await saveFullToCloud();
+        if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Local data uploaded to cloud");
+      } else { updateSyncStatus("synced"); }
+      return false;
+    } catch (e) {
+      console.log("Cloud load error: " + e.message);
+      updateSyncStatus("error", "Load failed");
+      return false;
+    }
+  }
+
+  if (window._chineseApp) {
+    window._chineseApp.onStatsChanged = debouncedStatsSave;
+    window._chineseApp.onDataChanged = function() { setTimeout(saveFullToCloud, 500); };
+  }
+
+  window._cloudSync = async function() {
+    if (!currentUser) return;
+    await saveFullToCloud();
+    if (window._chineseApp && window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Synced to cloud");
+  };
+
+  window.login = async function () {
+    try { var provider = new GoogleAuthProvider(); await signInWithPopup(auth, provider); }
+    catch (e) { console.log("Login error: " + e.message); }
+  };
+
+  window.logout = async function () {
+    try { await signOut(auth); currentUser = null; updateSyncStatus("hidden"); }
+    catch (e) { console.log("Logout error: " + e.message); }
+  };
+
+  onAuthStateChanged(auth, async function(user) {
+    var status = document.getElementById("userStatus");
+    var syncBtn = document.getElementById("btn-cloud-sync");
+    if (user) {
+      currentUser = user;
+      if (status) status.innerText = user.email;
+      if (syncBtn) syncBtn.classList.remove("hidden");
+      await loadFromCloud();
+    } else {
+      currentUser = null;
+      if (status) status.innerText = "Not logged in";
+      if (syncBtn) syncBtn.classList.add("hidden");
+      updateSyncStatus("hidden");
+    }
+  });
+
+} catch (e) {
+  console.log("Firebase init failed: " + e.message);
+  var status = document.getElementById("userStatus");
+  if (status) status.innerText = "Auth unavailable";
+  window.login = function () { console.log("Firebase not available"); };
+  window.logout = function () { console.log("Firebase not available"); };
+}
 </script>
 </body>
 </html>
