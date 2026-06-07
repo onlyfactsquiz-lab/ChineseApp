@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>汉语学习 — Chinese Learning Tool</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
@@ -134,13 +134,13 @@
   .quiz-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; }
   .quiz-display { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; word-break: break-word; }
   .quiz-display.chinese { font-family: 'Noto Serif SC', serif; font-size: 2.8rem; font-weight: 900; }
-  .quiz-display.pinyin { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 500; color: var(--gold); }
+  .quiz-display.pinyin { font-family: 'Source Sans 3', sans-serif; font-size: 1.8rem; font-weight: 600; color: var(--gold); }
   .quiz-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; }
   .answer-reveal { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px; margin-bottom: 18px; text-align: center; animation: fadeUp 0.25s ease-out; }
   .answer-reveal .answer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
   .answer-reveal .answer-text { font-size: 1.2rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
   .answer-reveal .answer-text.chinese { font-family: 'Noto Serif SC', serif; font-size: 2rem; font-weight: 900; }
-  .answer-reveal .answer-text.pinyin { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
+  .answer-reveal .answer-text.pinyin { font-family: 'Source Sans 3', sans-serif; color: var(--gold); }
   .answer-combined { display: flex; flex-direction: column; gap: 6px; align-items: center; }
   .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
   .stat-box { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px 10px; text-align: center; box-shadow: 0 2px 8px var(--shadow); }
@@ -155,7 +155,7 @@
   .stats-table td { padding: 10px 12px; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
   .stats-table tr:hover td { background: var(--bg-card-hover); }
   .stats-table .chinese-cell { font-family: 'Noto Serif SC', serif; font-weight: 600; }
-  .stats-table .pinyin-cell { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--gold); }
+  .stats-table .pinyin-cell { font-family: 'Source Sans 3', sans-serif; font-size: 0.82rem; color: var(--gold); }
   .stats-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--stat-bar-bg); min-width: 60px; }
   .stats-bar .bar-correct { background: var(--jade); transition: width 0.3s; }
   .stats-bar .bar-wrong { background: var(--wrong-red); transition: width 0.3s; }
@@ -243,7 +243,7 @@
   .wrong-word-main { font-weight: 600; font-size: 1rem; }
   .wrong-word-main .chinese-cell { font-family: 'Noto Serif SC', serif; }
   .wrong-word-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
-  .wrong-word-sub .pinyin-cell { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
+  .wrong-word-sub .pinyin-cell { font-family: 'Source Sans 3', sans-serif; color: var(--gold); }
   .wrong-stats { text-align: right; flex-shrink: 0; }
   .wrong-stats .wrong-count-big { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: var(--wrong-red); }
   .wrong-stats .wrong-detail { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-muted); }
@@ -325,7 +325,7 @@
   .review-q { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2px; }
   .review-a { font-weight: 600; font-size: 1rem; }
   .review-a .chinese-cell { font-family: 'Noto Serif SC', serif; }
-  .review-a .pinyin-cell { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
+  .review-a .pinyin-cell { font-family: 'Source Sans 3', sans-serif; color: var(--gold); }
   .review-audio-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 50%; transition: all 0.15s; flex-shrink: 0; }
   .review-audio-btn:hover { background: var(--badge-bg); }
 
@@ -739,6 +739,11 @@
   }
   function escapeHtml(text) {
     var div = document.createElement("div"); div.appendChild(document.createTextNode(text)); return div.innerHTML;
+  }
+  /* Normalize pinyin: convert decomposed diacritics (u + combining caron) to precomposed (ǔ) */
+  function normalizePinyin(text) {
+    if (!text) return text;
+    return typeof text.normalize === "function" ? text.normalize("NFC") : text;
   }
   function markUnsaved() {
     $("save-info").innerHTML = '<span class="unsaved-dot"></span> <span>Unsaved changes</span>';
@@ -1379,11 +1384,12 @@
     answerRevealed = false;
   }
   function getDisplayText(q, mode) {
-    if (mode === "combined") { var comb = getField(q, "combined"); if (comb) return comb;
+    if (mode === "combined") { var comb = getField(q, "combined"); if (comb) return normalizePinyin(comb);
       var p = []; var e = getField(q, "english"); var pi = getField(q, "pinyin"); var c = getField(q, "character");
-      if (e) p.push(e); if (pi) p.push(pi); if (c) p.push(c); return p.join("\n");
+      if (e) p.push(e); if (pi) p.push(normalizePinyin(pi)); if (c) p.push(c); return p.join("\n");
     }
-    return getField(q, mode) || "\u2014";
+    var text = getField(q, mode) || "\u2014";
+    return (mode === "pinyin" || mode === "combined") ? normalizePinyin(text) : text;
   }
   function revealAnswer() {
     answerRevealed = true;
@@ -1398,14 +1404,15 @@
     if (mode === "combined") {
       var e = getField(q, "english"); var p = getField(q, "pinyin"); var c = getField(q, "character");
       var comb = getField(q, "combined");
-      if (comb) return '<div class="answer-label">ANSWER</div><div class="answer-text">' + escapeHtml(comb) + '</div>';
+      if (comb) return '<div class="answer-label">ANSWER</div><div class="answer-text">' + escapeHtml(normalizePinyin(comb)) + '</div>';
       var html = '<div class="answer-label">ANSWER</div><div class="answer-combined">';
       if (c) html += '<div class="answer-text chinese">' + escapeHtml(c) + '</div>';
-      if (p) html += '<div class="answer-text pinyin">' + escapeHtml(p) + '</div>';
+      if (p) html += '<div class="answer-text pinyin">' + escapeHtml(normalizePinyin(p)) + '</div>';
       if (e) html += '<div class="answer-text">' + escapeHtml(e) + '</div>';
       return html + '</div>';
     }
     var text = getField(q, mode) || "\u2014";
+    if (mode === "pinyin" || mode === "combined") text = normalizePinyin(text);
     var cls = "answer-text"; if (mode === "character") cls += " chinese"; else if (mode === "pinyin") cls += " pinyin";
     return '<div class="answer-label">ANSWER</div><div class="' + cls + '">' + escapeHtml(text) + '</div>';
   }
@@ -1449,7 +1456,7 @@
       var qText = getDisplayText(mq, quizQuestionMode);
       var aHtml = "";
       if (cha) aHtml += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
-      if (pin) aHtml += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> ';
+      if (pin) aHtml += '<span class="pinyin-cell">' + escapeHtml(normalizePinyin(pin)) + '</span> ';
       if (eng) aHtml += escapeHtml(eng);
       if (!aHtml) aHtml = "\u2014";
       var row = document.createElement("div"); row.className = "review-item";
@@ -1533,7 +1540,7 @@
         if (!numStr) numStr = "#" + (di + 1);
         var wordStr = "";
         if (cha) wordStr += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
-        if (pin) wordStr += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> ';
+        if (pin) wordStr += '<span class="pinyin-cell">' + escapeHtml(normalizePinyin(pin)) + '</span> ';
         if (eng) wordStr += escapeHtml(eng); if (!wordStr) wordStr = "\u2014";
         var statCls = "ch-q-stat"; var statStr = "";
         if (dq.s.seen === 0) statStr = "not tried";
@@ -1566,7 +1573,7 @@
       var ch = getField(item.q, "chapter"); var qInCh = getField(item.q, "qInChapter"); var overallQ = getField(item.q, "overallQ");
       var pct = item.s.seen > 0 ? Math.round((item.s.correct / item.s.seen) * 100) : 0;
       var mainWord = cha ? '<span class="chinese-cell">' + escapeHtml(cha) + '</span>' : (eng ? escapeHtml(eng) : "\u2014");
-      var subLine = ""; if (pin) subLine += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span> '; if (cha && eng) subLine += escapeHtml(eng);
+      var subLine = ""; if (pin) subLine += '<span class="pinyin-cell">' + escapeHtml(normalizePinyin(pin)) + '</span> '; if (cha && eng) subLine += escapeHtml(eng);
       var numsLine = ""; if (ch) numsLine += "Ch." + escapeHtml(ch); if (qInCh) numsLine += (numsLine ? " " : "") + "Q" + escapeHtml(qInCh); if (overallQ) numsLine += "<br>#" + escapeHtml(overallQ);
       var row = document.createElement("div"); row.className = "wrong-list-item";
       row.innerHTML = '<div class="wrong-rank ' + (wi < 3 ? "top3" : "") + '">' + (wi + 1) + '</div>' +
@@ -1613,7 +1620,7 @@
       var eng = getField(row.q, "english"); var cha = getField(row.q, "character"); var pin = getField(row.q, "pinyin");
       var wh = "";
       if (cha) wh += '<span class="chinese-cell">' + escapeHtml(cha) + '</span> ';
-      if (pin) wh += '<span class="pinyin-cell">' + escapeHtml(pin) + '</span><br>';
+      if (pin) wh += '<span class="pinyin-cell">' + escapeHtml(normalizePinyin(pin)) + '</span><br>';
       if (eng) wh += escapeHtml(eng);
       tdWord.innerHTML = wh || "\u2014"; tr.appendChild(tdWord);
       var tdWrong = document.createElement("td");
