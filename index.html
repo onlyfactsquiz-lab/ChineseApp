@@ -1076,6 +1076,15 @@
   uploadArea.addEventListener("drop", function(e) { e.preventDefault(); uploadArea.classList.remove("dragover"); if (e.dataTransfer.files.length > 0) processFile(e.dataTransfer.files[0]); });
   fileInput.addEventListener("change", function() { if (fileInput.files.length > 0) processFile(fileInput.files[0]); });
 
+  /* Build a content fingerprint for matching questions across uploads */
+  function getContentFingerprint(q) {
+    var parts = []; var keys = Object.keys(q);
+    for (var i = 0; i < keys.length; i++) {
+      if (keys[i] !== "_index") { var v = String(q[keys[i]]).trim(); if (v) parts.push(v); }
+    }
+    return parts.join("|");
+  }
+
   function processFile(file) {
     var reader = new FileReader();
     reader.onload = function(e) {
@@ -1085,8 +1094,34 @@
         var sheet = workbook.Sheets[workbook.SheetNames[0]];
         var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (json.length === 0) { showToast("No data found."); return; }
+
+        /* Migrate stats: match old questions to new by content so progress is preserved */
+        var oldContentStats = {};
+        var migratedCount = 0;
+        if (allQuestions.length > 0 && Object.keys(stats).length > 0) {
+          for (var oi = 0; oi < allQuestions.length; oi++) {
+            var oldKey = String(oi);
+            if (stats[oldKey] && stats[oldKey].seen > 0) {
+              oldContentStats[getContentFingerprint(allQuestions[oi])] = stats[oldKey];
+            }
+          }
+        }
+
         allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
-        stats = {};
+
+        /* Rebuild stats: carry over progress for questions that still exist */
+        var newStats = {};
+        if (Object.keys(oldContentStats).length > 0) {
+          for (var ni = 0; ni < allQuestions.length; ni++) {
+            var fp = getContentFingerprint(allQuestions[ni]);
+            if (oldContentStats[fp]) {
+              newStats[String(ni)] = oldContentStats[fp];
+              migratedCount++;
+            }
+          }
+        }
+        stats = newStats;
+
         availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
         var detected = autoDetectColumns(availableColumns);
         columnMap.chapter = detected.chapter || ""; columnMap.qInChapter = detected.qInChapter || "";
@@ -1094,7 +1129,9 @@
         columnMap.pinyin = detected.pinyin || ""; columnMap.character = detected.character || "";
         columnMap.combined = detected.combined || "";
         buildMappingUI(); $("mapping-card").classList.remove("hidden"); markUnsaved();
-        showToast('Loaded ' + allQuestions.length + ' questions from "' + file.name + '"');
+        var msg = 'Loaded ' + allQuestions.length + ' questions from "' + file.name + '"';
+        if (migratedCount > 0) msg += ' \u2022 Progress kept for ' + migratedCount + ' existing questions';
+        showToast(msg);
       } catch (err) { showToast("Error: " + err.message); }
     };
     reader.readAsArrayBuffer(file);
