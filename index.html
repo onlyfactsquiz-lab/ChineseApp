@@ -135,6 +135,11 @@
   .quiz-display { font-size: 1.6rem; font-weight: 700; color: var(--text-primary); line-height: 1.4; word-break: break-word; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; }
   .quiz-display.chinese { font-family: 'Noto Serif SC', serif; font-size: 2.8rem; font-weight: 900; }
   .quiz-display.pinyin { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 1.8rem; font-weight: 600; color: var(--gold); }
+  .quiz-display.listening { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .listening-play-btn { width: 80px; height: 80px; border-radius: 50%; border: 3px solid var(--vermillion); background: var(--bg-card); color: var(--vermillion); font-size: 2.2rem; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(45,91,206,0.13); }
+  .listening-play-btn:hover { background: var(--vermillion); color: #fff; transform: scale(1.08); }
+  .listening-play-btn:active { transform: scale(0.96); }
+  .listening-hint { font-size: 0.9rem; color: var(--text-muted); font-family: 'Crimson Pro', serif; font-style: italic; }
   .quiz-meta { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-top: 14px; }
   .answer-reveal { background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 12px; padding: 20px; margin-bottom: 18px; text-align: center; animation: fadeUp 0.25s ease-out; }
   .answer-reveal .answer-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
@@ -486,6 +491,7 @@
           <label class="check-label"><input type="radio" name="questionMode" value="pinyin"> Pinyin</label>
           <label class="check-label"><input type="radio" name="questionMode" value="character"> Character</label>
           <label class="check-label"><input type="radio" name="questionMode" value="combined"> Combined</label>
+          <label class="check-label"><input type="radio" name="questionMode" value="listening"> &#128266; Listening</label>
         </div>
       </div>
       <div class="form-group">
@@ -1429,11 +1435,21 @@
     $("quiz-progress-fill").style.width = ((quizIndex / total) * 100) + "%";
     $("quiz-counter").textContent = (quizIndex + 1) + " / " + total;
     $("session-indicator").textContent = "\u2713 " + sessionCorrect + "  \u2717 " + sessionWrong;
-    var displayEl = $("quiz-display"); displayEl.textContent = getDisplayText(q, quizQuestionMode);
+    var displayEl = $("quiz-display");
+    var chText = getChineseText(q);
     displayEl.className = "quiz-display";
-    if (quizQuestionMode === "character") displayEl.classList.add("chinese");
-    else if (quizQuestionMode === "pinyin") displayEl.classList.add("pinyin");
-    $("quiz-label").textContent = quizQuestionMode.toUpperCase();
+    if (quizQuestionMode === "listening") {
+      displayEl.classList.add("listening");
+      displayEl.innerHTML = '<button class="listening-play-btn" id="listening-play">\u{1F50A}</button><div class="listening-hint">Tap to listen \u2022 what word is this?</div>';
+      $("listening-play").onclick = function() { speakChinese(chText); };
+      /* Auto-play on question load */
+      if (speechSupported && chText) setTimeout(function() { speakChinese(chText); }, 300);
+    } else {
+      displayEl.textContent = getDisplayText(q, quizQuestionMode);
+      if (quizQuestionMode === "character") displayEl.classList.add("chinese");
+      else if (quizQuestionMode === "pinyin") displayEl.classList.add("pinyin");
+    }
+    $("quiz-label").textContent = quizQuestionMode === "listening" ? "\u{1F3A7} LISTENING" : quizQuestionMode.toUpperCase();
     var meta = []; var chap = getField(q, "chapter"); var qNum = getField(q, "qInChapter");
     if (chap) meta.push("Ch. " + chap); if (qNum) meta.push("Q" + qNum);
     var key = getQuestionKey(q); ensureStats(key);
@@ -1442,10 +1458,10 @@
     if (stats[key].streak > 0) meta.push("\ud83d\udd25" + stats[key].streak + "\u00d7 streak");
     if (stats[key].srsBox > 0) meta.push("SRS: " + SRS_LABELS[stats[key].srsBox]);
     $("quiz-meta").textContent = meta.join("  \u2022  ");
-    /* Audio button: show if question or answer has Chinese */
-    var chText = getChineseText(q);
+    /* Audio button: show for non-listening modes if question or answer has Chinese */
     var audioBtn = $("btn-audio-quiz");
-    if (speechSupported && chText) { audioBtn.classList.remove("hidden"); audioBtn.onclick = function() { speakChinese(chText); }; }
+    if (quizQuestionMode === "listening") { audioBtn.classList.add("hidden"); }
+    else if (speechSupported && chText) { audioBtn.classList.remove("hidden"); audioBtn.onclick = function() { speakChinese(chText); }; }
     else { audioBtn.classList.add("hidden"); }
     $("answer-area").classList.add("hidden"); $("quiz-judge").classList.add("hidden");
     $("quiz-actions").innerHTML = '<button class="btn btn-primary btn-block" id="btn-show-answer">Reveal Answer</button>';
@@ -1463,7 +1479,9 @@
   function revealAnswer() {
     answerRevealed = true;
     var q = quizQueue[quizIndex];
-    $("answer-reveal").innerHTML = buildAnswerHTML(q, quizAnswerMode);
+    /* In listening mode, always show combined answer so the user sees the full word */
+    var ansMode = (quizQuestionMode === "listening") ? "combined" : quizAnswerMode;
+    $("answer-reveal").innerHTML = buildAnswerHTML(q, ansMode);
     $("answer-area").classList.remove("hidden"); $("quiz-actions").innerHTML = ""; $("quiz-judge").classList.remove("hidden");
     /* Show audio button in answer area — pronunciation only on user request */
     var chText = getChineseText(q);
