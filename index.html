@@ -763,7 +763,36 @@
     setTimeout(function() { t.classList.remove("show"); }, 2800);
   }
   function getQuestionKey(q) {
-    return q._index !== undefined ? String(q._index) : String(q[columnMap.overallQ] || q._index);
+    return getContentFingerprint(q);
+  }
+  /* Detect if stats/favorites use old numeric index keys */
+  function areStatsIndexBased() {
+    var statKeys = Object.keys(stats);
+    var favKeys = Object.keys(favorites);
+    var allKeys = statKeys.length > 0 ? statKeys : favKeys;
+    if (allKeys.length === 0) return false;
+    for (var i = 0; i < allKeys.length; i++) {
+      if (allKeys[i].indexOf("|") >= 0) return false;
+    }
+    for (var j = 0; j < allKeys.length; j++) {
+      if (!/^\d+$/.test(allKeys[j])) return false;
+    }
+    return true;
+  }
+  /* One-time migration: convert index-based stats/favorites keys to content fingerprints */
+  function migrateStatsToFingerprint() {
+    if (allQuestions.length === 0 || !areStatsIndexBased()) return false;
+    var newStats = {};
+    var newFavorites = {};
+    for (var i = 0; i < allQuestions.length; i++) {
+      var oldKey = String(i);
+      var fp = getContentFingerprint(allQuestions[i]);
+      if (stats[oldKey]) newStats[fp] = stats[oldKey];
+      if (favorites[oldKey]) newFavorites[fp] = true;
+    }
+    stats = newStats;
+    favorites = newFavorites;
+    return true;
   }
   function getField(q, field) {
     var col = columnMap[field]; if (!col) return "";
@@ -992,6 +1021,7 @@
     return true;
   }
   var hasSavedData = loadSavedData();
+  if (hasSavedData) migrateStatsToFingerprint();
 
   /* ========== SAVE APP ========== */
   function generateSaveData() {
@@ -1085,9 +1115,14 @@
       var sheet = workbook.Sheets[workbook.SheetNames[0]];
       var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       if (json.length === 0) return;
+
+      /* Migrate any old index-based stats to fingerprints before replacing questions */
+      migrateStatsToFingerprint();
+
       allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
       availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
       excelAutoLoaded = true;
+
       /* Auto-detect columns if no mapping exists yet */
       if (!columnMap.english && !columnMap.pinyin && !columnMap.character) {
         var detected = autoDetectColumns(availableColumns);
@@ -1122,9 +1157,11 @@
 
   /* Build a content fingerprint for matching questions across uploads */
   function getContentFingerprint(q) {
-    var parts = []; var keys = Object.keys(q);
+    var keys = Object.keys(q).filter(function(k) { return k !== "_index"; }).sort();
+    var parts = [];
     for (var i = 0; i < keys.length; i++) {
-      if (keys[i] !== "_index") { var v = String(q[keys[i]]).trim(); if (v) parts.push(v); }
+      var v = String(q[keys[i]]).trim();
+      if (v) parts.push(v);
     }
     return parts.join("|");
   }
@@ -1139,43 +1176,10 @@
         var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (json.length === 0) { showToast("No data found."); return; }
 
-        /* Migrate stats & favorites: match old questions to new by content so progress is preserved */
-        var oldContentStats = {};
-        var oldContentFavs = {};
-        var migratedCount = 0;
-        if (allQuestions.length > 0 && (Object.keys(stats).length > 0 || Object.keys(favorites).length > 0)) {
-          for (var oi = 0; oi < allQuestions.length; oi++) {
-            var oldKey = String(oi);
-            var fp = getContentFingerprint(allQuestions[oi]);
-            if (stats[oldKey] && stats[oldKey].seen > 0) {
-              oldContentStats[fp] = stats[oldKey];
-            }
-            if (favorites[oldKey]) {
-              oldContentFavs[fp] = true;
-            }
-          }
-        }
+        /* Migrate any old index-based stats to fingerprints before replacing questions */
+        migrateStatsToFingerprint();
 
         allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
-
-        /* Rebuild stats & favorites: carry over progress for questions that still exist */
-        var newStats = {};
-        var newFavorites = {};
-        if (Object.keys(oldContentStats).length > 0 || Object.keys(oldContentFavs).length > 0) {
-          for (var ni = 0; ni < allQuestions.length; ni++) {
-            var nfp = getContentFingerprint(allQuestions[ni]);
-            if (oldContentStats[nfp]) {
-              newStats[String(ni)] = oldContentStats[nfp];
-              migratedCount++;
-            }
-            if (oldContentFavs[nfp]) {
-              newFavorites[String(ni)] = true;
-            }
-          }
-        }
-        stats = newStats;
-        favorites = newFavorites;
-
         availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
         var detected = autoDetectColumns(availableColumns);
         columnMap.chapter = detected.chapter || ""; columnMap.qInChapter = detected.qInChapter || "";
@@ -1183,8 +1187,14 @@
         columnMap.pinyin = detected.pinyin || ""; columnMap.character = detected.character || "";
         columnMap.combined = detected.combined || "";
         buildMappingUI(); $("mapping-card").classList.remove("hidden"); markUnsaved();
+
+        /* Count how many existing stats match questions in the new file */
+        var matchCount = 0;
+        for (var qi = 0; qi < allQuestions.length; qi++) {
+          if (stats[getQuestionKey(allQuestions[qi])]) matchCount++;
+        }
         var msg = 'Loaded ' + allQuestions.length + ' questions from "' + file.name + '"';
-        if (migratedCount > 0) msg += ' \u2022 Progress kept for ' + migratedCount + ' existing questions';
+        if (matchCount > 0) msg += ' \u2022 Progress kept for ' + matchCount + ' existing questions';
         showToast(msg);
       } catch (err) { showToast("Error: " + err.message); }
     };
@@ -2186,6 +2196,7 @@
       if (data.availableColumns) availableColumns = data.availableColumns;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
+      migrateStatsToFingerprint();
       var chapters = getUniqueChapters();
       $("saved-banner").classList.remove("hidden");
       $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 \u2601 Cloud synced";
@@ -2202,6 +2213,7 @@
       if (data.favorites) favorites = data.favorites;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
+      migrateStatsToFingerprint();
       if (allQuestions.length > 0) {
         var chapters = getUniqueChapters();
         $("saved-banner").classList.remove("hidden");
