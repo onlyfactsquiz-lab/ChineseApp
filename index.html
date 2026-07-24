@@ -319,6 +319,30 @@
   .btn-audio:hover { border-color: var(--vermillion); color: var(--vermillion); background: var(--badge-bg); }
   .btn-audio.playing { border-color: var(--vermillion); color: var(--vermillion); animation: pulse 0.8s ease-in-out infinite; }
 
+  /* Favorite star button */
+  .btn-favorite { background: none; border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.3rem; transition: all 0.2s; color: var(--text-muted); position: absolute; top: 12px; left: 12px; line-height: 1; }
+  .btn-favorite:hover { border-color: var(--gold); color: var(--gold); background: rgba(201, 168, 76, 0.08); }
+  .btn-favorite.favorited { border-color: var(--gold); color: var(--gold); background: rgba(201, 168, 76, 0.12); }
+  .btn-favorite.favorited:hover { background: rgba(201, 168, 76, 0.18); }
+
+  /* Favorites button on config */
+  .btn-favorites { background: linear-gradient(135deg, var(--gold), #b8942f); color: #fff; box-shadow: 0 3px 12px rgba(201, 168, 76, 0.3); }
+  .btn-favorites:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(201, 168, 76, 0.4); filter: brightness(1.1); }
+
+  /* Favorites list in stats */
+  .fav-list-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--border-light); transition: background 0.15s; cursor: pointer; }
+  .fav-list-item:last-child { border-bottom: none; }
+  .fav-list-item:hover { background: var(--bg-card-hover); }
+  .fav-star { color: var(--gold); font-size: 1.1rem; flex-shrink: 0; }
+  .fav-word-info { flex: 1; min-width: 0; }
+  .fav-word-main { font-weight: 600; font-size: 1rem; }
+  .fav-word-main .chinese-cell { font-family: 'Noto Serif SC', serif; }
+  .fav-word-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 2px; }
+  .fav-word-sub .pinyin-cell { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; color: var(--gold); }
+  .fav-stats { text-align: right; flex-shrink: 0; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--text-muted); }
+  .fav-remove-btn { background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: all 0.15s; flex-shrink: 0; }
+  .fav-remove-btn:hover { color: var(--wrong-red); background: rgba(194, 54, 49, 0.1); }
+
   /* Session review */
   .review-list { margin-top: 18px; }
   .review-list-title { font-family: 'Crimson Pro', serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
@@ -511,6 +535,8 @@
       <button class="btn btn-srs btn-block" id="btn-srs-review" style="font-size:1.14rem;padding:14px 20px;">&#129504; Smart Review (SRS)</button>
       <div class="srs-due-count" id="srs-due-count"></div>
       <button class="btn btn-primary btn-block" id="btn-start-quiz" style="font-size:1.14rem;padding:14px 20px;margin-top:10px;">Start Quiz</button>
+      <button class="btn btn-favorites btn-block" id="btn-favorites-quiz" style="margin-top:10px;font-size:1.05rem;padding:12px 20px;">&#11088; Favorites Only</button>
+      <div id="favorites-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
       <button class="btn btn-secondary btn-block" id="btn-unanswered" style="margin-top:10px;">&#10067; Unanswered Questions Only</button>
       <div id="unanswered-count" style="font-family:'JetBrains Mono',monospace;font-size:0.78rem;color:var(--text-muted);text-align:center;margin-top:5px;"></div>
       <button class="btn btn-wrong btn-block" id="btn-practice-mistakes" style="margin-top:10px;">&#10007; Practice Mistakes</button>
@@ -532,6 +558,7 @@
     <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
     <div class="quiz-counter" id="quiz-counter"></div>
     <div class="quiz-question-card" id="quiz-question-card">
+      <button class="btn-favorite" id="btn-favorite-quiz" title="Toggle favorite">&#9734;</button>
       <button class="btn-audio hidden" id="btn-audio-quiz" title="Play pronunciation">&#128264;</button>
       <div class="quiz-label" id="quiz-label">QUESTION</div>
       <div class="quiz-display" id="quiz-display"></div>
@@ -577,6 +604,7 @@
 
     <div class="stats-tabs" id="stats-tabs">
       <button class="stats-tab active" data-tab="tab-chapters">By Chapter</button>
+      <button class="stats-tab" data-tab="tab-favorites">&#11088; Favorites</button>
       <button class="stats-tab" data-tab="tab-top-wrong">Top 30 Wrong</button>
       <button class="stats-tab" data-tab="tab-all">All Questions</button>
       <button class="stats-tab" data-tab="tab-completion">Completion</button>
@@ -588,6 +616,14 @@
     <div class="stats-tab-content active" id="tab-chapters">
       <div class="chapter-stats-grid" id="chapter-stats-grid"></div>
       <div class="empty-state hidden" id="chapter-stats-empty"><div class="empty-icon">&#128237;</div><p>No chapter data to display yet.</p></div>
+    </div>
+
+    <div class="stats-tab-content" id="tab-favorites">
+      <div class="card">
+        <div class="card-title"><span class="icon">&#11088;</span> Favorited Questions</div>
+        <div id="favorites-list"></div>
+        <div class="empty-state hidden" id="favorites-empty"><div class="empty-icon">&#11088;</div><p>No favorites yet. Tap the star on any question card to add it here.</p></div>
+      </div>
     </div>
 
     <div class="stats-tab-content" id="tab-top-wrong">
@@ -698,6 +734,7 @@
   var columnMap = { chapter: "", qInChapter: "", overallQ: "", english: "", pinyin: "", character: "", combined: "" };
   var availableColumns = [];
   var stats = {};
+  var favorites = {};
   var quizQueue = [];
   var quizIndex = 0;
   var quizQuestionMode = "english";
@@ -948,6 +985,7 @@
     allQuestions = saved.questions.map(function(row, idx) { row._index = idx; return row; });
     columnMap = saved.columnMap || columnMap;
     stats = saved.stats || {};
+    favorites = saved.favorites || {};
     availableColumns = saved.availableColumns || Object.keys(allQuestions[0]).filter(function(k) { return k !== "_index"; });
     dailyLog = saved.dailyLog || {};
     dailyGoal = saved.dailyGoal || 50;
@@ -962,7 +1000,7 @@
       for (var i = 0; i < keys.length; i++) { if (keys[i] !== "_index") copy[keys[i]] = q[keys[i]]; }
       return copy;
     });
-    return JSON.stringify({ questions: cleanQuestions, columnMap: columnMap, stats: stats, availableColumns: availableColumns, dailyLog: dailyLog, dailyGoal: dailyGoal, savedAt: new Date().toISOString() });
+    return JSON.stringify({ questions: cleanQuestions, columnMap: columnMap, stats: stats, favorites: favorites, availableColumns: availableColumns, dailyLog: dailyLog, dailyGoal: dailyGoal, savedAt: new Date().toISOString() });
   }
   function saveApp() {
     var wasDark = document.documentElement.classList.contains("dark");
@@ -1101,32 +1139,42 @@
         var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
         if (json.length === 0) { showToast("No data found."); return; }
 
-        /* Migrate stats: match old questions to new by content so progress is preserved */
+        /* Migrate stats & favorites: match old questions to new by content so progress is preserved */
         var oldContentStats = {};
+        var oldContentFavs = {};
         var migratedCount = 0;
-        if (allQuestions.length > 0 && Object.keys(stats).length > 0) {
+        if (allQuestions.length > 0 && (Object.keys(stats).length > 0 || Object.keys(favorites).length > 0)) {
           for (var oi = 0; oi < allQuestions.length; oi++) {
             var oldKey = String(oi);
+            var fp = getContentFingerprint(allQuestions[oi]);
             if (stats[oldKey] && stats[oldKey].seen > 0) {
-              oldContentStats[getContentFingerprint(allQuestions[oi])] = stats[oldKey];
+              oldContentStats[fp] = stats[oldKey];
+            }
+            if (favorites[oldKey]) {
+              oldContentFavs[fp] = true;
             }
           }
         }
 
         allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
 
-        /* Rebuild stats: carry over progress for questions that still exist */
+        /* Rebuild stats & favorites: carry over progress for questions that still exist */
         var newStats = {};
-        if (Object.keys(oldContentStats).length > 0) {
+        var newFavorites = {};
+        if (Object.keys(oldContentStats).length > 0 || Object.keys(oldContentFavs).length > 0) {
           for (var ni = 0; ni < allQuestions.length; ni++) {
-            var fp = getContentFingerprint(allQuestions[ni]);
-            if (oldContentStats[fp]) {
-              newStats[String(ni)] = oldContentStats[fp];
+            var nfp = getContentFingerprint(allQuestions[ni]);
+            if (oldContentStats[nfp]) {
+              newStats[String(ni)] = oldContentStats[nfp];
               migratedCount++;
+            }
+            if (oldContentFavs[nfp]) {
+              newFavorites[String(ni)] = true;
             }
           }
         }
         stats = newStats;
+        favorites = newFavorites;
 
         availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
         var detected = autoDetectColumns(availableColumns);
@@ -1255,11 +1303,11 @@
         } else {
           selectedChaptersSet[clickedCh] = !selectedChaptersSet[clickedCh];
         }
-        syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
+        syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateSRSCount();
       });
       container.appendChild(chip);
     }
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateDailyGoalDisplay(); updateSRSCount();
     $("range-to").value = allQuestions.length; $("range-to").max = allQuestions.length; $("range-from").max = allQuestions.length;
   }
   $("daily-goal-input").addEventListener("change", function() {
@@ -1268,11 +1316,11 @@
   });
   $("btn-select-all").addEventListener("click", function() {
     for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = true;
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateSRSCount();
   });
   $("btn-deselect-all").addEventListener("click", function() {
     for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = false;
-    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateSRSCount();
+    syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateSRSCount();
   });
 
   function getSelectedChapters() {
@@ -1425,6 +1473,42 @@
     switchScreen("quiz"); showQuestion();
   });
 
+  /* ========== FAVORITES ========== */
+  function toggleFavorite(key) {
+    if (favorites[key]) { delete favorites[key]; }
+    else { favorites[key] = true; }
+    markUnsaved(); autoSaveToStorage();
+    if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
+  }
+  function updateFavoriteButton(key) {
+    var btn = $("btn-favorite-quiz");
+    if (!btn) return;
+    if (favorites[key]) { btn.innerHTML = "\u2605"; btn.classList.add("favorited"); btn.title = "Remove from favorites"; }
+    else { btn.innerHTML = "\u2606"; btn.classList.remove("favorited"); btn.title = "Add to favorites"; }
+  }
+  function getFavoriteQuestions() {
+    var sc = getSelectedChapters(); if (sc.length === 0) return [];
+    var scMap = {}; for (var si = 0; si < sc.length; si++) scMap[sc[si]] = true;
+    var favQ = [];
+    for (var i = 0; i < allQuestions.length; i++) {
+      var q = allQuestions[i]; var ch = getField(q, "chapter"); if (!scMap[ch]) continue;
+      var key = getQuestionKey(q);
+      if (favorites[key]) favQ.push(q);
+    }
+    return favQ;
+  }
+  function updateFavoritesCount() {
+    var favQ = getFavoriteQuestions(); var el = $("favorites-count"); var btn = $("btn-favorites-quiz");
+    var sc = getSelectedChapters(); var scope = sc.length === allChaptersList.length ? "across all chapters" : "in selected chapter" + (sc.length !== 1 ? "s" : "");
+    if (favQ.length === 0) { el.textContent = "No favorites " + scope; btn.disabled = true; }
+    else { el.textContent = favQ.length + " favorite" + (favQ.length !== 1 ? "s" : "") + " " + scope; btn.disabled = false; }
+  }
+  $("btn-favorites-quiz").addEventListener("click", function() {
+    var favQ = getFavoriteQuestions();
+    if (favQ.length === 0) { showToast("No favorites in selected chapters!"); return; }
+    startPracticeMode(favQ);
+  });
+
   /* ========== QUIZ LOGIC ========== */
   function showQuestion() {
     if (quizIndex >= quizQueue.length) {
@@ -1463,6 +1547,9 @@
     if (quizQuestionMode === "listening") { audioBtn.classList.add("hidden"); }
     else if (speechSupported && chText) { audioBtn.classList.remove("hidden"); audioBtn.onclick = function() { speakChinese(chText); }; }
     else { audioBtn.classList.add("hidden"); }
+    /* Favorite button */
+    updateFavoriteButton(key);
+    $("btn-favorite-quiz").onclick = function() { toggleFavorite(key); updateFavoriteButton(key); };
     $("answer-area").classList.add("hidden"); $("quiz-judge").classList.add("hidden");
     $("quiz-actions").innerHTML = '<button class="btn btn-primary btn-block" id="btn-show-answer">Reveal Answer</button>';
     $("btn-show-answer").addEventListener("click", revealAnswer);
@@ -1559,7 +1646,7 @@
       if (btn && btn.dataset.ch) speakChinese(btn.dataset.ch);
     });
   }
-  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount(); });
+  $("btn-results-settings").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateDailyGoalDisplay(); updateSRSCount(); });
   $("btn-results-retry").addEventListener("click", function() {
     if (sessionMistakes.length === 0) return;
     quizQueue = shuffleArray(sessionMistakes); quizIndex = 0; sessionCorrect = 0; sessionWrong = 0; sessionMistakes = [];
@@ -1589,7 +1676,7 @@
       '<div class="stat-box"><div class="stat-value">' + totalSeen + '</div><div class="stat-label">Attempts</div></div>' +
       '<div class="stat-box"><div class="stat-value green">' + totalCorrect + '</div><div class="stat-label">Correct</div></div>' +
       '<div class="stat-box"><div class="stat-value ' + (lifetimePct >= 70 ? "gold" : "") + '">' + lifetimePct + '%</div><div class="stat-label">Accuracy</div></div>';
-    buildChapterStats(); buildTopWrong(); buildAllQuestionsTable(); buildCompletionGrid(); buildProgressChart();
+    buildChapterStats(); buildFavoritesList(); buildTopWrong(); buildAllQuestionsTable(); buildCompletionGrid(); buildProgressChart();
   }
 
   /* ========== TAB: BY CHAPTER ========== */
@@ -1642,6 +1729,52 @@
       grid.appendChild(card);
       (function(idx) { card.addEventListener("click", function() { $("ch-detail-" + idx).classList.toggle("open"); }); })(ci);
     }
+  }
+
+  /* ========== TAB: FAVORITES ========== */
+  function buildFavoritesList() {
+    var list = $("favorites-list"); list.innerHTML = "";
+    var favItems = [];
+    for (var i = 0; i < allQuestions.length; i++) {
+      var key = getQuestionKey(allQuestions[i]);
+      if (favorites[key]) {
+        var s = stats[key] || { seen: 0, correct: 0, wrong: 0 };
+        favItems.push({ q: allQuestions[i], s: s, key: key });
+      }
+    }
+    if (favItems.length === 0) { $("favorites-empty").classList.remove("hidden"); return; }
+    $("favorites-empty").classList.add("hidden");
+    for (var fi = 0; fi < favItems.length; fi++) {
+      var item = favItems[fi];
+      var eng = getField(item.q, "english"); var cha = getField(item.q, "character"); var pin = getField(item.q, "pinyin");
+      var ch = getField(item.q, "chapter"); var qInCh = getField(item.q, "qInChapter");
+      var mainWord = cha ? '<span class="chinese-cell">' + escapeHtml(cha) + '</span>' : (eng ? escapeHtml(eng) : "\u2014");
+      var subLine = ""; if (pin) subLine += '<span class="pinyin-cell">' + escapeHtml(normalizePinyin(pin)) + '</span> '; if (cha && eng) subLine += escapeHtml(eng);
+      if (ch) subLine += (subLine ? " \u2022 " : "") + "Ch." + escapeHtml(ch);
+      if (qInCh) subLine += " Q" + escapeHtml(qInCh);
+      var statStr = "";
+      if (item.s.seen > 0) { var pct = Math.round((item.s.correct / item.s.seen) * 100); statStr = pct + "% (" + item.s.correct + "/" + item.s.seen + ")"; }
+      else { statStr = "not tried"; }
+      var row = document.createElement("div"); row.className = "fav-list-item";
+      row.innerHTML = '<div class="fav-star">\u2605</div>' +
+        '<div class="fav-word-info"><div class="fav-word-main">' + mainWord + '</div><div class="fav-word-sub">' + subLine + '</div></div>' +
+        '<div class="fav-stats">' + statStr + '</div>' +
+        '<button class="fav-remove-btn" data-key="' + escapeHtml(item.key) + '" title="Remove from favorites">\u2716</button>';
+      (function(questionObj) {
+        row.querySelector(".fav-word-info").addEventListener("click", function() { startSingleQuestion(questionObj); });
+      })(item.q);
+      list.appendChild(row);
+    }
+    list.addEventListener("click", function(e) {
+      var rmBtn = e.target.closest(".fav-remove-btn");
+      if (rmBtn && rmBtn.dataset.key) {
+        var key = rmBtn.dataset.key;
+        delete favorites[key]; markUnsaved(); autoSaveToStorage();
+        if (window._chineseApp && window._chineseApp.onStatsChanged) window._chineseApp.onStatsChanged();
+        buildFavoritesList();
+        showToast("Removed from favorites");
+      }
+    });
   }
 
   /* ========== TAB: TOP 30 WRONG ========== */
@@ -1988,9 +2121,9 @@
   });
   $("btn-quit-quiz").addEventListener("click", function() {
     if (singleQuestionMode) { singleQuestionMode = false; buildStatsScreen(); switchScreen("stats"); activateCompletionTab(); return; }
-    switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount();
+    switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateDailyGoalDisplay(); updateSRSCount();
   });
-  $("btn-stats-back").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateDailyGoalDisplay(); updateSRSCount(); });
+  $("btn-stats-back").addEventListener("click", function() { switchScreen("config"); syncChipStyles(); updateQuestionCount(); updateMistakesCount(); updateUnansweredCount(); updateHardestCount(); updateFavoritesCount(); updateDailyGoalDisplay(); updateSRSCount(); });
   $("btn-config-stats").addEventListener("click", function() { lastScreen = "config"; buildStatsScreen(); switchScreen("stats"); });
   $("btn-config-reset").addEventListener("click", function() {
     showConfirmDialog("This will permanently erase ALL your answer statistics. Your vocabulary words will remain. Are you sure?", function() {
@@ -2034,12 +2167,14 @@
         }),
         columnMap: columnMap,
         stats: stats,
+        favorites: favorites,
         availableColumns: availableColumns,
         dailyLog: dailyLog,
         dailyGoal: dailyGoal
       };
     },
     getStats: function() { return stats; },
+    getFavorites: function() { return favorites; },
     getDailyData: function() { return { dailyLog: dailyLog, dailyGoal: dailyGoal }; },
     hasData: function() { return allQuestions.length > 0; },
     loadCloudData: function(data, shouldSwitch) {
@@ -2047,6 +2182,7 @@
       allQuestions = data.questions.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
       if (data.columnMap) columnMap = data.columnMap;
       if (data.stats) stats = data.stats;
+      if (data.favorites) favorites = data.favorites;
       if (data.availableColumns) availableColumns = data.availableColumns;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
@@ -2063,6 +2199,7 @@
       /* Loads only stats/progress from cloud — questions come from Excel on server */
       if (data.columnMap) columnMap = data.columnMap;
       if (data.stats) stats = data.stats;
+      if (data.favorites) favorites = data.favorites;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
       if (allQuestions.length > 0) {
@@ -2079,6 +2216,7 @@
     isExcelAutoLoaded: function() { return excelAutoLoaded; },
     resetUserStats: function() {
       stats = {};
+      favorites = {};
       dailyLog = {};
       dailyGoal = 20;
       if (allQuestions.length > 0) {
@@ -2131,7 +2269,7 @@ try {
       var daily = window._chineseApp.getDailyData();
       /* Save stats only — questions come from words.xlsx on the server */
       await setDoc(doc(db, "users", currentUser.uid), {
-        columnMap: state.columnMap, stats: state.stats,
+        columnMap: state.columnMap, stats: state.stats, favorites: state.favorites,
         availableColumns: state.availableColumns, dailyLog: daily.dailyLog, dailyGoal: daily.dailyGoal,
         savedAt: new Date().toISOString(), email: currentUser.email
       });
@@ -2148,9 +2286,10 @@ try {
     updateSyncStatus("syncing");
     try {
       var stats = window._chineseApp.getStats();
+      var favs = window._chineseApp.getFavorites();
       var daily = window._chineseApp.getDailyData();
       await updateDoc(doc(db, "users", currentUser.uid), {
-        stats: stats, dailyLog: daily.dailyLog, savedAt: new Date().toISOString()
+        stats: stats, favorites: favs, dailyLog: daily.dailyLog, savedAt: new Date().toISOString()
       });
       updateSyncStatus("synced");
     } catch (e) {
