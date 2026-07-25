@@ -1326,6 +1326,7 @@
   $("daily-goal-input").addEventListener("change", function() {
     var val = parseInt(this.value); if (isNaN(val) || val < 1) val = 1; if (val > 999) val = 999;
     this.value = val; dailyGoal = val; updateDailyGoalDisplay(); markUnsaved(); autoSaveToStorage();
+    if (window._chineseApp && window._chineseApp.onDataChanged) window._chineseApp.onDataChanged();
   });
   $("btn-select-all").addEventListener("click", function() {
     for (var i = 0; i < allChaptersList.length; i++) selectedChaptersSet[allChaptersList[i]] = true;
@@ -1984,7 +1985,7 @@
       '<div class="progress-mini-stat"><div class="pms-value">' + activeDays + '</div><div class="pms-label">Active Days</div></div>' +
       '<div class="progress-mini-stat"><div class="pms-value">' + streak + '</div><div class="pms-label">Streak</div></div>';
     /* Build SVG chart */
-    var W = 640; var H = 200; var padL = 36; var padR = 10; var padT = 16; var padB = 28;
+    var W = 640; var H = 200; var padL = 36; var padR = 36; var padT = 16; var padB = 28;
     var chartW = W - padL - padR; var chartH = H - padT - padB;
     var barW = Math.floor(chartW / days.length) - 2;
     var maxAns = 1;
@@ -1993,11 +1994,18 @@
     var gridColor = isDark ? "#2e2e4e" : "#e0d8c8";
     var textColor = isDark ? "#707090" : "#8a8aaa";
     var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg" style="font-family:JetBrains Mono,monospace;">';
-    /* Y-axis grid lines */
+    /* Y-axis grid lines + left axis (accuracy %) */
     for (var yi = 0; yi <= 4; yi++) {
       var yy = padT + chartH - (yi / 4) * chartH;
       svg += '<line x1="' + padL + '" y1="' + yy + '" x2="' + (W - padR) + '" y2="' + yy + '" stroke="' + gridColor + '" stroke-width="0.5"/>';
       svg += '<text x="' + (padL - 4) + '" y="' + (yy + 3) + '" text-anchor="end" fill="' + textColor + '" font-size="8">' + (yi * 25) + '%</text>';
+    }
+    /* Right Y-axis (questions answered) */
+    var rightAxisColor = isDark ? "#e0c76e" : "#a08030";
+    for (var ri = 0; ri <= 4; ri++) {
+      var ry = padT + chartH - (ri / 4) * chartH * 0.85;
+      var rVal = Math.round((ri / 4) * maxAns);
+      svg += '<text x="' + (W - padR + 4) + '" y="' + (ry + 3) + '" text-anchor="start" fill="' + rightAxisColor + '" font-size="8">' + rVal + '</text>';
     }
     /* Bars (questions count) and line (accuracy) */
     var linePts = [];
