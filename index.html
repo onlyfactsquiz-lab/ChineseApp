@@ -1116,12 +1116,15 @@
       var json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
       if (json.length === 0) return;
 
-      /* Migrate any old index-based stats to fingerprints before replacing questions */
-      migrateStatsToFingerprint();
-
       allQuestions = json.map(function(row, idx) { normalizeRow(row); row._index = idx; return row; });
       availableColumns = Object.keys(json[0]).filter(function(k) { return k !== "_index"; });
       excelAutoLoaded = true;
+
+      /* Migrate old index-based stats to fingerprints AFTER questions are loaded */
+      var didMigrate = migrateStatsToFingerprint();
+      if (didMigrate && window._chineseApp && window._chineseApp.onStatsChanged) {
+        window._chineseApp.onStatsChanged();
+      }
 
       /* Auto-detect columns if no mapping exists yet */
       if (!columnMap.english && !columnMap.pinyin && !columnMap.character) {
@@ -2196,7 +2199,7 @@
       if (data.availableColumns) availableColumns = data.availableColumns;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
-      migrateStatsToFingerprint();
+      var didMigrate = migrateStatsToFingerprint();
       var chapters = getUniqueChapters();
       $("saved-banner").classList.remove("hidden");
       $("saved-banner-detail").textContent = allQuestions.length + " questions across " + chapters.length + " chapter" + (chapters.length !== 1 ? "s" : "") + " \u2022 \u2601 Cloud synced";
@@ -2204,7 +2207,7 @@
       buildConfigScreen();
       if (shouldSwitch) switchScreen("config");
       markSaved();
-      return true;
+      return didMigrate ? "migrated" : true;
     },
     loadCloudStats: function(data, shouldSwitch) {
       /* Loads only stats/progress from cloud — questions come from Excel on server */
@@ -2213,7 +2216,7 @@
       if (data.favorites) favorites = data.favorites;
       if (data.dailyLog) dailyLog = data.dailyLog;
       if (data.dailyGoal) dailyGoal = data.dailyGoal;
-      migrateStatsToFingerprint();
+      var didMigrate = migrateStatsToFingerprint();
       if (allQuestions.length > 0) {
         var chapters = getUniqueChapters();
         $("saved-banner").classList.remove("hidden");
@@ -2223,14 +2226,14 @@
         if (shouldSwitch) switchScreen("config");
         markSaved();
       }
-      return true;
+      return didMigrate ? "migrated" : true;
     },
     isExcelAutoLoaded: function() { return excelAutoLoaded; },
     resetUserStats: function() {
       stats = {};
       favorites = {};
       dailyLog = {};
-      dailyGoal = 20;
+      dailyGoal = 50;
       if (allQuestions.length > 0) {
         buildConfigScreen();
       }
@@ -2327,17 +2330,22 @@ try {
         var quizActive = document.getElementById("screen-quiz").classList.contains("active");
         /* Stats-only load: questions come from words.xlsx on server */
         if (data.stats || data.columnMap) {
-          if (window._chineseApp.loadCloudStats(data, !quizActive)) {
+          var loadResult = window._chineseApp.loadCloudStats(data, !quizActive);
+          if (loadResult) {
             updateSyncStatus("synced");
             if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Stats loaded from cloud");
+            /* If stats were migrated from index-based to fingerprint keys, save back immediately */
+            if (loadResult === "migrated") { setTimeout(saveFullToCloud, 1000); }
             return true;
           }
         }
         /* Backward compat: old saves that still have questions */
         if (data.questions && data.questions.length > 0 && !window._chineseApp.hasData()) {
-          if (window._chineseApp.loadCloudData(data, !quizActive)) {
+          var dataResult = window._chineseApp.loadCloudData(data, !quizActive);
+          if (dataResult) {
             updateSyncStatus("synced");
             if (window._chineseApp.showToast) window._chineseApp.showToast("\u2601 Data loaded from cloud");
+            if (dataResult === "migrated") { setTimeout(saveFullToCloud, 1000); }
             return true;
           }
         }
